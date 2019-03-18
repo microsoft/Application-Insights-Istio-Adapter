@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.csproj", "{9283C79A-E801-4B16-8D02-6AC7F6FE8881}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{210EEC3B-DD4D-456E-A57C-DFC0E4AD9B25}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleHost", "ConsoleHost\ConsoleHost.csproj", "{A6D75834-2B59-45F2-B87E-BACCEEB64D53}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{20169545-2463-4F13-9E19-852617C56537}"
+	ProjectSection(SolutionItems) = preProject
+		ApplicationInsightsIstioPluginStrongNameKey.snk = ApplicationInsightsIstioPluginStrongNameKey.snk
+		AuthenticodeWhitelist.txt = AuthenticodeWhitelist.txt
+		build-docker.cmd = build-docker.cmd
+		Dockerfile = Dockerfile
+		istio-mixer-plugin-deployment.yaml = istio-mixer-plugin-deployment.yaml
+		NuGet.config = NuGet.config
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryTest", "LibraryTest\LibraryTest.csproj", "{C1C89701-E30D-43E8-897A-0247D961CA31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signing", "Signing\Signing.csproj", "{F9A28D77-48C2-4F1D-902E-D0D9209F8148}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9283C79A-E801-4B16-8D02-6AC7F6FE8881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9283C79A-E801-4B16-8D02-6AC7F6FE8881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9283C79A-E801-4B16-8D02-6AC7F6FE8881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9283C79A-E801-4B16-8D02-6AC7F6FE8881}.Release|Any CPU.Build.0 = Release|Any CPU
+		{210EEC3B-DD4D-456E-A57C-DFC0E4AD9B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{210EEC3B-DD4D-456E-A57C-DFC0E4AD9B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{210EEC3B-DD4D-456E-A57C-DFC0E4AD9B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{210EEC3B-DD4D-456E-A57C-DFC0E4AD9B25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6D75834-2B59-45F2-B87E-BACCEEB64D53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6D75834-2B59-45F2-B87E-BACCEEB64D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6D75834-2B59-45F2-B87E-BACCEEB64D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6D75834-2B59-45F2-B87E-BACCEEB64D53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1C89701-E30D-43E8-897A-0247D961CA31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1C89701-E30D-43E8-897A-0247D961CA31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1C89701-E30D-43E8-897A-0247D961CA31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1C89701-E30D-43E8-897A-0247D961CA31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9A28D77-48C2-4F1D-902E-D0D9209F8148}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9A28D77-48C2-4F1D-902E-D0D9209F8148}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9A28D77-48C2-4F1D-902E-D0D9209F8148}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9A28D77-48C2-4F1D-902E-D0D9209F8148}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2442C480-EF10-491F-9E18-69E79102682A}
+	EndGlobalSection
+EndGlobal

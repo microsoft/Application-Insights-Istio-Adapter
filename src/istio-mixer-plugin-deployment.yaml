@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application-insights-plugin
+  namespace: istio-system
+  labels:
+    app: application-insights-plugin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: application-insights-plugin
+  template:
+    metadata:
+      labels:
+        app: application-insights-plugin
+    spec:
+      containers:
+      - name: application-insights-plugin
+        image: alkaplan/application-insights-istio-mixer-adapter:dev
+        imagePullPolicy: "Always" # //!!!
+        ports:
+        - name: http2-in-port
+          containerPort: 6789
+        env:
+        - name: ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY
+          value: "cda1439e-8bb5-4b4d-b88d-d24f63f5a34a"
+        - name: ISTIO_MIXER_PLUGIN_AI_LIVE_METRICS_STREAM_AUTH_KEY
+          value: ""
+        - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES
+          value: "default"
+        - name: ISTIO_MIXER_PLUGIN_LOG_LEVEL
+          value: Trace # Info is the default, Trace for detailed tracing, Error for errors only
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: application-insights-plugin-service
+  namespace: istio-system
+spec:
+  selector:
+    app: application-insights-plugin
+  ports:
+  - name: http2-in-port
+    protocol: TCP
+    port: 6789
+    targetPort: 6789

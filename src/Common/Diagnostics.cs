@@ -1,0 +1,125 @@
+﻿namespace Microsoft.IstioMixerPlugin.Common
+{
+    using System;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Threading;
+    using System.Xml;
+    using NLog;
+    using NLog.Config;
+
+    public static class Diagnostics
+    {
+        private const string MinLogLevelEnvironmentVariableName = "ISTIO_MIXER_PLUGIN_LOG_LEVEL";
+
+        private static readonly Logger logger;
+        private static SpinLock spinLock = new SpinLock();
+
+        //!!! no test coverage in this file
+
+        static Diagnostics()
+        {
+            try
+            {
+                logger = LogManager.GetCurrentClassLogger();
+
+                if (LogManager.Configuration?.LoggingRules?.Any() == true)
+                {
+                    // config file has been read, use that
+                }
+                else
+                {
+                    // no config file, use default config
+                    string nlogConfigXml = ReadDefaultConfiguration();
+
+                    SetDefaultConfiguration(nlogConfigXml);
+                }
+                
+                string minLogLevel = Environment.GetEnvironmentVariable(MinLogLevelEnvironmentVariableName);
+
+                if (!string.IsNullOrWhiteSpace(minLogLevel))
+                {
+                    // this will throw if invalid value
+                    LogLevel minLogLevelParsed = LogLevel.FromString(minLogLevel);
+
+                    LogManager.Configuration.LoggingRules.Single().SetLoggingLevels(minLogLevelParsed, LogLevel.Fatal);
+
+                    LogManager.ReconfigExistingLoggers();
+                }
+            }
+            catch (Exception)
+            {
+                // telemetry can never crash the application, swallow the exception
+                // this probably means no logging
+            }
+        }
+
+        private static void SetDefaultConfiguration(string configXml)
+        {
+            using (var sr = new StringReader(configXml))
+            {
+                using (var xr = XmlReader.Create(sr))
+                {
+                    LogManager.Configuration = new XmlLoggingConfiguration(xr, null);
+                }
+            }
+
+            LogManager.ReconfigExistingLoggers();
+        }
+
+        private static string ReadDefaultConfiguration()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "Microsoft.IstioMixerPlugin.Common.NLog.config";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+
+        private static void Log(string message, LogLevel logLevel)
+        {
+            bool lockTaken = false;
+            spinLock.Enter(ref lockTaken);
+
+            if (lockTaken)
+            {
+                // ok to lose the message in an unlikely case that lockTaken is false
+                logger.Log(logLevel, message);
+
+                spinLock.Exit();
+            }
+        }
+
+        public static void Flush(TimeSpan timeout)
+        {
+            LogManager.Flush(timeout);
+        }
+
+        public static void LogTrace(string message)
+        {
+            Diagnostics.Log(message, LogLevel.Trace);
+        }
+
+        public static void LogInfo(string message)
+        {
+            Diagnostics.Log(message, LogLevel.Info);
+        }
+
+        public static void LogWarn(string message)
+        {
+            Diagnostics.Log(message, LogLevel.Warn);
+        }
+
+        public static void LogError(string message)
+        {
+            Diagnostics.Log(message, LogLevel.Error);
+        }
+
+    }
+}

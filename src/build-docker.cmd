@@ -1,0 +1,1 @@
+docker build -f ".\Dockerfile" -t application-insights-plugin:dev ".\ConsoleHost\bin\Release\netcoreapp2.1\publish\vspublish\linux-x64"
