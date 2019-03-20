@@ -80,6 +80,9 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest
                 {
                     {"context.reporter.uid", new Value() {StringValue = "kubernetes://destination-deployment-1"}},
                     {"context.reporter.kind", new Value() {StringValue = "inbound"}},
+                    {"context.protocol", new Value() {StringValue = "http"}},
+
+                    {"connection.event", new Value() {StringValue = ""}},
 
                     {"source.uid", new Value() {StringValue = "kubernetes://source-deployment-1"}},
                     {"source.workload.namespace", new Value() {StringValue = "default"}},
@@ -88,6 +91,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest
                     {"source.labels.istio.isingressgateway", new Value() {BoolValue = false}},
                     {"source.role.name", new Value() {StringValue = "source"}},
                     {"source.role.instance", new Value() {StringValue = "source-1"}},
+                    {"source.ip", new Value() {IpAddressValue= new IPAddress()}},
 
                     {"destination.uid", new Value() {StringValue = "kubernetes://destination-deployment-1"}},
                     {"destination.workload.namespace", new Value() {StringValue = "default"}},
@@ -95,21 +99,31 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest
                     {"destination.labels.appinsights.monitoring.enabled", new Value() {StringValue = ""}},
                     {"destination.role.name", new Value() {StringValue = "destination"}},
                     {"destination.role.instance", new Value() {StringValue = "destination-1"}},
+                    {"destination.port", new Value() {StringValue = "80"}},
+                    {"destination.ip", new Value() {IpAddressValue= new IPAddress()}},
+                    {"destination.service.host", new Value() {StringValue = ""}},
 
-                    {"request.scheme", new Value() {StringValue = "http"}},
-                    {"request.path", new Value() {StringValue = "/some/path"}},
                     {"http.useragent", new Value() {StringValue = "Mozilla"}},
-                    {"http.host", new Value() {StringValue = "destination-1:80"}},
                     {"http.status_code", new Value() {StringValue = "203"}},
                     {"http.path", new Value() {StringValue = "/some/path"}},
                     {"http.method", new Value() {StringValue = "GET"}},
-                    {"destination.port", new Value() {StringValue = "80"}},
+
+                    {"host", new Value() {StringValue = "destination-1:80"}},
 
                     {"request.headers.request.id", new Value() {StringValue = "request-id-1"}},
+                    {"request.scheme", new Value() {StringValue = "http"}},
+                    {"request.path", new Value() {StringValue = "/some/path"}},
+                    {"request.size", new Value() {Int64Value= 0}},
                     {"request.headers.synthetictest.runid", new Value() {StringValue = ""}},
                     {"request.headers.synthetictest.location", new Value() {StringValue = ""}},
                     {"request.headers.request.context", new Value() {StringValue = ""}},
+
                     {"response.headers.request.context", new Value() {StringValue = ""}},
+                    {"response.size", new Value() {Int64Value= 0}},
+
+                    {"api.service", new Value() {StringValue= ""}},
+                    {"api.protocol", new Value() {StringValue= ""}},
+
                 }
             };
         }

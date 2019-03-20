@@ -9,8 +9,6 @@
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using ApplicationInsights.DataContracts;
-    using Istio.Policy.V1Beta1;
     using Exception = System.Exception;
     using Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel;
     using Tracespan;

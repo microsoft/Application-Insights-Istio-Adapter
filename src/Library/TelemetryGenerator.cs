@@ -53,6 +53,10 @@
             var contextReporterUid = instance.SpanTags["context.reporter.uid"].StringValue;
             var contextReporterKind = instance.SpanTags["context.reporter.kind"].StringValue.ToLowerInvariant();
 
+            var contextProtocol = instance.SpanTags["context.protocol"].StringValue.ToLowerInvariant();
+
+            var connectionEvent = instance.SpanTags["connection.event"].StringValue.ToLowerInvariant();
+
             var sourceUid = instance.SpanTags["source.uid"].StringValue;
             var destinationUid = instance.SpanTags["destination.uid"].StringValue;
 
@@ -106,7 +110,7 @@
             var strippedDestinationRoleInstance = instance.SpanTags["destination.role.instance"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
 
             var httpUserAgent = instance.SpanTags["http.useragent"].StringValue;
-            var httpHost = instance.SpanTags["http.host"].StringValue;
+            var host = instance.SpanTags["host"].StringValue;
             var httpStatusCode = instance.SpanTags["http.status_code"].Int64Value;
             var httpPath = instance.SpanTags["http.path"].StringValue;
             var httpMethod = instance.SpanTags["http.method"].StringValue;
@@ -114,7 +118,6 @@
             var requestScheme = instance.SpanTags["request.scheme"].StringValue;
             
             var destinationPort = instance.SpanTags["destination.port"].Int64Value;
-
             
             // if source/desination information is insufficient, let's assume it's an external caller/dependency and use whatever little we know about them
             if (string.IsNullOrWhiteSpace(strippedSourceRoleName) || string.Equals(strippedSourceRoleName, "unknown", StringComparison.InvariantCultureIgnoreCase))
@@ -129,12 +132,12 @@
 
             if (string.IsNullOrWhiteSpace(strippedDestinationRoleName) || string.Equals(strippedDestinationRoleName, "unknown", StringComparison.InvariantCultureIgnoreCase))
             {
-                strippedDestinationRoleName = httpHost;
+                strippedDestinationRoleName = host;
             }
 
             if (string.IsNullOrWhiteSpace(strippedDestinationRoleInstance) || string.Equals(strippedDestinationRoleInstance, "unknown", StringComparison.InvariantCultureIgnoreCase))
             {
-                strippedDestinationRoleInstance = httpHost;
+                strippedDestinationRoleInstance = host;
             }
 
             // if none of the workloads have anything to do with us, skip the instance completely
@@ -142,8 +145,15 @@
                 out bool isInstanceInteresting, out bool isInstanceFullyWithinTargetArea, out bool isSourceWithinTargetArea, out bool isDestinationWithinTargetArea);
 
             Diagnostics.LogTrace($"source: {sourceWorkloadName}, destination: {destinationWorkloadName}, reporter: {contextReporterUid}, kind: {contextReporterKind}");
-                
-            if (!isInstanceInteresting)
+
+            if (contextProtocol == "tcp")
+            {
+                //!!!
+                Diagnostics.LogTrace(Invariant($"TCP. {debugInfo}"));
+            }
+
+            //!!! do we want TCP?
+            if (!isInstanceInteresting || (contextProtocol == "tcp" && connectionEvent != "open"))
             {
                 Diagnostics.LogTrace("SKIPPED");
 
@@ -153,8 +163,11 @@
             // Request-Id header format https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/HierarchicalRequestId.md
             bool incomingRequestIdPresent = !string.IsNullOrWhiteSpace(requestHeadersRequestId);
             string incomingRequestId = incomingRequestIdPresent ? requestHeadersRequestId : Invariant($"|{RandomStringLong()}.");
-            
-            string url = string.Format(CultureInfo.InvariantCulture, "{0}://{1}{2}", requestScheme, strippedDestinationRoleInstance, httpPath);
+
+            string url = Invariant(
+                $@"{contextProtocol}{(string.IsNullOrWhiteSpace(contextProtocol) ? string.Empty : "://")}{strippedDestinationRoleInstance}{httpPath}{
+                        (destinationPort > 0 ? $":{destinationPort}" : string.Empty)
+                    }");
 
             long code = httpStatusCode == 0 ? 0 : (httpStatusCode >= 400 ? httpStatusCode : 0);
 
@@ -185,6 +198,9 @@
                     {"aks.debug.info", debugInfo}
                 };
 
+                DateTimeOffset? startTime = instance.StartTime?.Value?.ToDateTimeOffset();
+                DateTimeOffset? endTime = instance.EndTime?.Value?.ToDateTimeOffset();
+
                 string latestRequestId = incomingRequestId;
 
                 // if the source is an Istio Ingress Gateway we want to generate an additional pair of dependency/request on its behalf
@@ -200,10 +216,10 @@
                     yield return this.GenerateRequest(spanName: strippedDestinationRoleInstance,
                         requestId: gatewayRequestId,
                         parentRequestId: incomingRequestIdPresent ? incomingRequestId : string.Empty,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: instance.StartTime?.Value?.ToDateTimeOffset(), endTime: instance.EndTime?.Value?.ToDateTimeOffset(),
+                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
                         roleName: strippedSourceRoleName, 
                         roleInstance: strippedSourceRoleInstance, 
-                        httpUrl: url, httpHost: httpHost,
+                        httpUrl: url, httpHost: host,
                         httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
                         httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
                         requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: true, debugData: debugData);
@@ -214,12 +230,13 @@
                     yield return this.GenerateDependency(spanName: strippedDestinationRoleInstance, 
                         requestId: requestId,
                         parentRequestId: gatewayRequestId,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: instance.StartTime?.Value?.ToDateTimeOffset(),
-                        endTime: instance.EndTime?.Value?.ToDateTimeOffset(),
+                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime,
+                        endTime: endTime,
                         roleName: strippedSourceRoleName,
                         roleInstance: strippedSourceRoleInstance,
                         httpUrl: url,
-                        httpHost: httpHost, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
+                        httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
+                        protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
                         debugData: debugData);
                     
                     // advance latestRequestId so that the main dependency/request pair is stiched to the ingress gateway pair we've already created
@@ -245,11 +262,12 @@
                     yield return this.GenerateDependency(spanName: strippedDestinationRoleInstance, 
                         requestId: requestId,
                         parentRequestId: latestRequestId,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: instance.StartTime?.Value?.ToDateTimeOffset(), endTime: instance.EndTime?.Value?.ToDateTimeOffset(), 
+                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime, 
                         roleName: strippedSourceRoleName, 
                         roleInstance: strippedSourceRoleInstance, 
                         httpUrl: url,
-                        httpHost: httpHost, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
+                        httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
+                        protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
                         debugData: debugData);
                     
                     // advance latestRequestId
@@ -265,10 +283,10 @@
                     yield return this.GenerateRequest(spanName: strippedDestinationRoleInstance, 
                         requestId: AcknowledgeRequest(latestRequestId),
                         parentRequestId: latestRequestId,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: instance.StartTime?.Value?.ToDateTimeOffset(), endTime: instance.EndTime?.Value?.ToDateTimeOffset(),
+                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
                         roleName: strippedDestinationRoleName, 
                         roleInstance: strippedDestinationRoleInstance, 
-                        httpUrl: url, httpHost: httpHost,
+                        httpUrl: url, httpHost: host,
                         httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
                         httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
                         requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: !isSourceIstioIngressGateway, debugData: debugData);
@@ -278,7 +296,7 @@
 
         private DependencyTelemetry GenerateDependency(string spanName, string requestId, string parentRequestId,
             long spanStatusCode, string spanStatusMessage, DateTimeOffset? startTime, DateTimeOffset? endTime, string roleName, string roleInstance,
-            string httpUrl, string httpHost, string httpStatusCode, string httpPath, string httpMethod, long httpPort, string httpScheme, string responseHeadersRequestContextAppId, Dictionary<string, string> debugData)
+            string httpUrl, string httpHost, string httpStatusCode, string httpPath, string httpMethod, long httpPort, string httpScheme, string protocol, string responseHeadersRequestContextAppId, Dictionary<string, string> debugData)
         {
             string host = GetHost(httpUrl);
 
@@ -317,7 +335,7 @@
 
             if (string.IsNullOrWhiteSpace(responseHeadersRequestContextAppId))
             {
-                dependency.Type = "Http";
+                dependency.Type = protocol;
                 dependency.Target = host;
             }
             else

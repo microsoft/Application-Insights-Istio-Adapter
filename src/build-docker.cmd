@@ -1,1 +1,2 @@
-docker build -f ".\Dockerfile" -t application-insights-plugin:dev ".\ConsoleHost\bin\Release\netcoreapp2.1\publish\vspublish\linux-x64"
+rem docker build -f ".\Dockerfile" -t application-insights-istio-mixer-adapter:dev ".\ConsoleHost\bin\Release\netcoreapp2.1\publish\vspublish\linux-x64"
+docker build -f ".\Dockerfile" -t application-insights-istio-mixer-adapter:dev --no-cache ".\ConsoleHost\bin\Release\netcoreapp2.1\alpine-x64\publish"
