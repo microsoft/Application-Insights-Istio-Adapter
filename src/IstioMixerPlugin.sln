@@ -11,12 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleHost", "ConsoleHost\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{20169545-2463-4F13-9E19-852617C56537}"
 	ProjectSection(SolutionItems) = preProject
+		application-insights-istio-mixer-adapter-deployment.yaml = application-insights-istio-mixer-adapter-deployment.yaml
 		ApplicationInsightsIstioPluginStrongNameKey.snk = ApplicationInsightsIstioPluginStrongNameKey.snk
 		AuthenticodeWhitelist.txt = AuthenticodeWhitelist.txt
 		build-docker.cmd = build-docker.cmd
 		Dockerfile = Dockerfile
-		istio-mixer-plugin-deployment.yaml = istio-mixer-plugin-deployment.yaml
 		NuGet.config = NuGet.config
+		publish.cmd = publish.cmd
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryTest", "LibraryTest\LibraryTest.csproj", "{C1C89701-E30D-43E8-897A-0247D961CA31}"

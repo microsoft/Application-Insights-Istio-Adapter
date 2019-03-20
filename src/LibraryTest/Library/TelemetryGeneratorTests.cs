@@ -7,6 +7,9 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     using ApplicationInsights.Channel;
     using ApplicationInsights.DataContracts;
     using ApplicationInsights.Extensibility.Implementation;
+    using Google.Protobuf;
+    using Google.Protobuf.WellKnownTypes;
+    using Istio.Policy.V1Beta1;
     using IstioMixerPlugin.Library;
     using Tracespan;
     using VisualStudio.TestTools.UnitTesting;
@@ -56,7 +59,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance1.SpanTags["request.scheme"].StringValue = "http";
             instance1.SpanTags["request.path"].StringValue = "/some/path";
             instance1.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance1.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance1.SpanTags["host"].StringValue = "destination-deployment-1";
             instance1.SpanTags["http.status_code"].StringValue = "200";
             instance1.SpanTags["http.path"].StringValue = "/some/path";
             instance1.SpanTags["http.method"].StringValue = "GET";
@@ -87,7 +90,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance2.SpanTags["request.scheme"].StringValue = "http";
             instance2.SpanTags["request.path"].StringValue = "/some/path";
             instance2.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance2.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance2.SpanTags["host"].StringValue = "destination-deployment-1";
             instance2.SpanTags["http.status_code"].StringValue = "200";
             instance2.SpanTags["http.path"].StringValue = "/some/path";
             instance2.SpanTags["http.method"].StringValue = "GET";
@@ -118,7 +121,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance3.SpanTags["request.scheme"].StringValue = "http";
             instance3.SpanTags["request.path"].StringValue = "/some/path";
             instance3.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance3.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance3.SpanTags["host"].StringValue = "destination-deployment-1";
             instance3.SpanTags["http.status_code"].StringValue = "200";
             instance3.SpanTags["http.path"].StringValue = "/some/path";
             instance3.SpanTags["http.method"].StringValue = "GET";
@@ -149,7 +152,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance4.SpanTags["request.scheme"].StringValue = "http";
             instance4.SpanTags["request.path"].StringValue = "/some/path";
             instance4.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance4.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance4.SpanTags["host"].StringValue = "destination-deployment-1";
             instance4.SpanTags["http.status_code"].StringValue = "200";
             instance4.SpanTags["http.path"].StringValue = "/some/path";
             instance4.SpanTags["http.method"].StringValue = "GET";
@@ -225,7 +228,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance1.SpanTags["request.scheme"].StringValue = "http";
             instance1.SpanTags["request.path"].StringValue = "/some/path";
             instance1.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance1.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance1.SpanTags["host"].StringValue = "destination-deployment-1";
             instance1.SpanTags["http.status_code"].StringValue = "200";
             instance1.SpanTags["http.path"].StringValue = "/some/path";
             instance1.SpanTags["http.method"].StringValue = "GET";
@@ -256,7 +259,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance2.SpanTags["request.scheme"].StringValue = "http";
             instance2.SpanTags["request.path"].StringValue = "/some/path";
             instance2.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance2.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance2.SpanTags["host"].StringValue = "destination-deployment-1";
             instance2.SpanTags["http.status_code"].StringValue = "200";
             instance2.SpanTags["http.path"].StringValue = "/some/path";
             instance2.SpanTags["http.method"].StringValue = "GET";
@@ -287,7 +290,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance3.SpanTags["request.scheme"].StringValue = "http";
             instance3.SpanTags["request.path"].StringValue = "/some/path";
             instance3.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance3.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance3.SpanTags["host"].StringValue = "destination-deployment-1";
             instance3.SpanTags["http.status_code"].StringValue = "200";
             instance3.SpanTags["http.path"].StringValue = "/some/path";
             instance3.SpanTags["http.method"].StringValue = "GET";
@@ -318,7 +321,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance4.SpanTags["request.scheme"].StringValue = "http";
             instance4.SpanTags["request.path"].StringValue = "/some/path";
             instance4.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance4.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance4.SpanTags["host"].StringValue = "destination-deployment-1";
             instance4.SpanTags["http.status_code"].StringValue = "200";
             instance4.SpanTags["http.path"].StringValue = "/some/path";
             instance4.SpanTags["http.method"].StringValue = "GET";
@@ -349,7 +352,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance5.SpanTags["request.scheme"].StringValue = "http";
             instance5.SpanTags["request.path"].StringValue = "/some/path";
             instance5.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance5.SpanTags["http.host"].StringValue = "yet-destination-deployment-1";
+            instance5.SpanTags["host"].StringValue = "yet-destination-deployment-1";
             instance5.SpanTags["http.status_code"].StringValue = "200";
             instance5.SpanTags["http.path"].StringValue = "/some/path";
             instance5.SpanTags["http.method"].StringValue = "GET";
@@ -380,7 +383,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance6.SpanTags["request.scheme"].StringValue = "http";
             instance6.SpanTags["request.path"].StringValue = "/some/path";
             instance6.SpanTags["http.useragent"].StringValue = "Mozilla";
-            instance6.SpanTags["http.host"].StringValue = "yet-destination-deployment-1";
+            instance6.SpanTags["host"].StringValue = "yet-destination-deployment-1";
             instance6.SpanTags["http.status_code"].StringValue = "200";
             instance6.SpanTags["http.path"].StringValue = "/some/path";
             instance6.SpanTags["http.method"].StringValue = "GET";
@@ -437,6 +440,88 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
         }
 
         [TestMethod]
+        public void TelemetryGeneratorTests_TcpExternalDependencyIsHandledCorrectly()
+        {
+            // ARRANGE
+            var telemetryGenerator = new TelemetryGenerator("default");
+
+            // incoming request, reported by outbound proxy of the gateway
+            var now = DateTimeOffset.UtcNow;
+            var instance1 = Common.GetStandardInstanceMsg();
+
+            instance1.SpanName = " ://";
+            instance1.StartTime = new TimeStamp(){ Value = Timestamp.FromDateTimeOffset(now)};
+            instance1.EndTime = new TimeStamp() { Value = Timestamp.FromDateTimeOffset(now) };
+            instance1.Name = "i1.instance.istio-system";
+
+            instance1.SpanTags["context.reporter.kind"].StringValue = "outbound";
+            instance1.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-1.default";
+            instance1.SpanTags["context.protocol"].StringValue = "TCP";
+
+            instance1.SpanTags["connection.event"].StringValue = "OPEN";
+
+            instance1.SpanTags["source.uid"].StringValue = "kubernetes://source-1.default";
+            instance1.SpanTags["source.workload.name"].StringValue = "source";
+            instance1.SpanTags["source.ip"].IpAddressValue = new IPAddress(){Value = ByteString.FromBase64("CvQSCA==")};
+            instance1.SpanTags["source.labels.istio.isingressgateway"].BoolValue = false;
+            instance1.SpanTags["source.role.instance"].StringValue = "kubernetes://source-1.default";
+            //instance1.SpanTags["source.version"].StringValue = "";
+            //instance1.SpanTags["source.workload.uid"].StringValue = "istio://default/workloads/source";
+            instance1.SpanTags["source.workload.namespace"].StringValue = "default";
+            instance1.SpanTags["source.labels.appinsights.monitoring.enabled"].StringValue = "";
+            //instance1.SpanTags["source.user"].StringValue = "";
+            instance1.SpanTags["source.role.name"].StringValue = "source.default";
+
+            instance1.SpanTags["destination.service.host"].StringValue = "destination.redis.cache.windows.net";
+            instance1.SpanTags["destination.labels.appinsights.monitoring.enabled"].StringValue = "";
+            instance1.SpanTags["destination.role.instance"].StringValue = "unknown";
+            instance1.SpanTags["destination.role.name"].StringValue = "unknown";
+            instance1.SpanTags["destination.uid"].StringValue = "unknown";
+            instance1.SpanTags["destination.workload.namespace"].StringValue = "unknown";
+            instance1.SpanTags["destination.workload.name"].StringValue = "unknown";
+            //instance1.SpanTags["destination.workload.uid"].StringValue = "unknown";
+            instance1.SpanTags["destination.ip"].IpAddressValue = new IPAddress() { Value = ByteString.FromBase64("DVuGLQ==") };
+            instance1.SpanTags["destination.port"].Int64Value = 6379;
+
+            instance1.SpanTags["host"].StringValue = "destination.redis.cache.windows.net";
+
+            instance1.SpanTags["request.headers.request.context"].StringValue = "";
+            instance1.SpanTags["response.size"].Int64Value = 0;
+            instance1.SpanTags["api.service"].StringValue = "";
+            instance1.SpanTags["api.protocol"].StringValue = "";
+            instance1.SpanTags["http.useragent"].StringValue = "";
+            instance1.SpanTags["request.headers.synthetictest.location"].StringValue = "";
+            //instance1.SpanTags["source.labels.appinsights.monitoring.isgateway"].StringValue = "";
+            instance1.SpanTags["request.path"].StringValue = "";
+            instance1.SpanTags["request.size"].Int64Value = 0;
+            instance1.SpanTags["http.method"].StringValue = "";
+            instance1.SpanTags["http.path"].StringValue = "";
+            //instance1.SpanTags["api.operation"].StringValue = "";
+            instance1.SpanTags["http.status_code"].Int64Value = 0;
+            instance1.SpanTags["request.headers.request.id"].StringValue = "";
+            instance1.SpanTags["request.scheme"].StringValue = "";
+            instance1.SpanTags["request.headers.synthetictest.runid"].StringValue = "";
+            instance1.SpanTags["response.headers.request.context"].StringValue = "";
+            
+            // ACT
+            ITelemetry[] telemetryItems = telemetryGenerator.Generate(instance1).ToArray();
+
+            // ASSERT
+            Assert.AreEqual(1, telemetryItems.Length);
+
+            var tcpDependency = telemetryItems[0] as DependencyTelemetry;
+            
+            Assert.IsNotNull(tcpDependency);
+            
+            ValidateTelemetrySource(tcpDependency, "kubernetes://source-1.default", "unknown", "kubernetes://source-1.default", "outbound");
+            
+            Assert.AreEqual("source-1.default", tcpDependency.Context.Cloud.RoleInstance);
+            Assert.AreEqual("source.default", tcpDependency.Context.Cloud.RoleName);
+            Assert.AreEqual("destination.redis.cache.windows.net", tcpDependency.Target);
+            Assert.AreEqual("tcp://destination.redis.cache.windows.net:6379", tcpDependency.Data);
+        }
+
+        [TestMethod]
         public void TelemetryGeneratorTests_AvailabilityProbeIsHandledCorrectlyThroughIngressGateway()
         {
             // ARRANGE
@@ -462,7 +547,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance1.SpanTags["request.scheme"].StringValue = "http";
             instance1.SpanTags["request.path"].StringValue = "/some/path";
             instance1.SpanTags["http.useragent"].StringValue = "GSM";
-            instance1.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance1.SpanTags["host"].StringValue = "destination-deployment-1";
             instance1.SpanTags["http.status_code"].StringValue = "200";
             instance1.SpanTags["http.path"].StringValue = "/some/path";
             instance1.SpanTags["http.method"].StringValue = "GET";
@@ -493,7 +578,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance2.SpanTags["request.scheme"].StringValue = "http";
             instance2.SpanTags["request.path"].StringValue = "/some/path";
             instance2.SpanTags["http.useragent"].StringValue = "GSM";
-            instance2.SpanTags["http.host"].StringValue = "destination-deployment-1";
+            instance2.SpanTags["host"].StringValue = "destination-deployment-1";
             instance2.SpanTags["http.status_code"].StringValue = "200";
             instance2.SpanTags["http.path"].StringValue = "/some/path";
             instance2.SpanTags["http.method"].StringValue = "GET";
