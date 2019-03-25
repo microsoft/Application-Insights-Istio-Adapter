@@ -1,1 +1,0 @@
-dotnet publish ConsoleHost\ConsoleHost.csproj -c release -r alpine-x64 /p:CrossGenDuringPublish=false /p:ShowLinkerSizeComparison=true

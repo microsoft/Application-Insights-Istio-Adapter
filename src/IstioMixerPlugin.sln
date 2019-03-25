@@ -11,18 +11,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleHost", "ConsoleHost\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{20169545-2463-4F13-9E19-852617C56537}"
 	ProjectSection(SolutionItems) = preProject
-		application-insights-istio-mixer-adapter-deployment.yaml = application-insights-istio-mixer-adapter-deployment.yaml
 		ApplicationInsightsIstioPluginStrongNameKey.snk = ApplicationInsightsIstioPluginStrongNameKey.snk
 		AuthenticodeWhitelist.txt = AuthenticodeWhitelist.txt
 		build-docker.cmd = build-docker.cmd
 		Dockerfile = Dockerfile
 		NuGet.config = NuGet.config
-		publish.cmd = publish.cmd
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryTest", "LibraryTest\LibraryTest.csproj", "{C1C89701-E30D-43E8-897A-0247D961CA31}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signing", "Signing\Signing.csproj", "{F9A28D77-48C2-4F1D-902E-D0D9209F8148}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kubernetes", "kubernetes", "{6DA57F72-E7D5-4359-A286-013B66BB31E2}"
+	ProjectSection(SolutionItems) = preProject
+		kubernetes\application-insights-istio-mixer-adapter-deployment.yaml = kubernetes\application-insights-istio-mixer-adapter-deployment.yaml
+		kubernetes\attributes.yaml = kubernetes\attributes.yaml
+		installation.md = installation.md
+		kubernetes\sample_operator_cfg.yaml = kubernetes\sample_operator_cfg.yaml
+		kubernetes\template.yaml = kubernetes\template.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +60,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6DA57F72-E7D5-4359-A286-013B66BB31E2} = {20169545-2463-4F13-9E19-852617C56537}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2442C480-EF10-491F-9E18-69E79102682A}

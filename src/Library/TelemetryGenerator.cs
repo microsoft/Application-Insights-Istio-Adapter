@@ -21,7 +21,7 @@
 
     internal class TelemetryGenerator
     {
-        private readonly string targetNamspace;
+        private readonly string[] targetNamespaces;
 
         private static readonly Random rand = new Random();
         private static readonly object sync = new object();
@@ -30,9 +30,9 @@
 
         private static readonly Regex requestContextAppIdRegex = new Regex("^appId=(?<appId>.+)$", RegexOptions.Compiled);
 
-        public TelemetryGenerator(string targetNamespace)
+        public TelemetryGenerator(params string[] targetNamespaces)
         {
-            this.targetNamspace = targetNamespace ?? string.Empty;
+            this.targetNamespaces = targetNamespaces ?? new string[0];
         }
 
         public IEnumerable<ITelemetry> Generate(params InstanceMsg[] instances)
@@ -55,7 +55,7 @@
 
             var contextProtocol = instance.SpanTags["context.protocol"].StringValue.ToLowerInvariant();
 
-            var connectionEvent = instance.SpanTags["connection.event"].StringValue.ToLowerInvariant();
+            //var connectionEvent = instance.SpanTags["connection.event"].StringValue.ToLowerInvariant();
 
             var sourceUid = instance.SpanTags["source.uid"].StringValue;
             var destinationUid = instance.SpanTags["destination.uid"].StringValue;
@@ -146,14 +146,14 @@
 
             Diagnostics.LogTrace($"source: {sourceWorkloadName}, destination: {destinationWorkloadName}, reporter: {contextReporterUid}, kind: {contextReporterKind}");
 
-            if (contextProtocol == "tcp")
-            {
-                //!!!
-                Diagnostics.LogTrace(Invariant($"TCP. {debugInfo}"));
-            }
+            //if (contextProtocol == "tcp")
+            //{
+            //    //!!!
+            //    Diagnostics.LogTrace(Invariant($"TCP. {debugInfo}"));
+            //}
 
             //!!! do we want TCP?
-            if (!isInstanceInteresting || (contextProtocol == "tcp" && connectionEvent != "open"))
+            if (!isInstanceInteresting || !contextProtocol.StartsWith("http") /*|| (contextProtocol == "tcp" && connectionEvent != "open")*/)
             {
                 Diagnostics.LogTrace("SKIPPED");
 
@@ -408,9 +408,9 @@
             // the user is also capable of opting a workload in or out of our area of interest by labeling it appropriately
 
             // if there is no target namespace, any workload is considered to be within the target namespace
-            bool sourceIsWithinTargetNamespace = string.IsNullOrWhiteSpace(this.targetNamspace) || string.Equals(sourceNamespace, this.targetNamspace, StringComparison.InvariantCultureIgnoreCase);
+            bool sourceIsWithinTargetNamespace = this.targetNamespaces.Length == 0 || this.targetNamespaces.Any(ns => string.Equals(sourceNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
             bool destinationIsWithinTargetNamespace =
-                string.IsNullOrWhiteSpace(this.targetNamspace) || string.Equals(destinationNamespace, this.targetNamspace, StringComparison.InvariantCultureIgnoreCase);
+                this.targetNamespaces.Length == 0 || this.targetNamespaces.Any(ns => string.Equals(destinationNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
 
             bool sourceIsPositivelyLabeled = bool.TryParse(sourceAppInsightsMonitoringEnabled, out bool sourceAppInsightsMonitoringEnabledParsed) && sourceAppInsightsMonitoringEnabledParsed;
             bool destinationIsPositivelyLabeled = bool.TryParse(destinationAppInsightsMonitoringEnabled, out bool destinationAppInsightsMonitoringEnabledParsed) &&

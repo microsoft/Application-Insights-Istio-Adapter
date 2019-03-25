@@ -1,6 +1,7 @@
 namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
     using ApplicationInsights;
@@ -17,6 +18,43 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     [TestClass]
     public class TelemetryGeneratorTests
     {
+        [TestMethod]
+        public void TelemetryGeneratorTests_HandlesTargetNamespacesCorrectly()
+        {
+            // ARRANGE
+            var telemetryGenerator = new TelemetryGenerator("ns1", "ns2");
+
+            // ACT
+            var instance1 = Common.GetStandardInstanceMsg();
+            instance1.SpanTags["source.workload.namespace"].StringValue = "ns10";
+            instance1.SpanTags["destination.workload.namespace"].StringValue = "ns20";
+
+            var instance2 = Common.GetStandardInstanceMsg();
+            instance2.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance2.SpanTags["destination.workload.namespace"].StringValue = "ns10";
+            instance2.SpanTags["context.reporter.kind"].StringValue = "outbound";
+
+            var instance3 = Common.GetStandardInstanceMsg();
+            instance3.SpanTags["source.workload.namespace"].StringValue = "ns10";
+            instance3.SpanTags["destination.workload.namespace"].StringValue = "ns1";
+
+            var instance4 = Common.GetStandardInstanceMsg();
+            instance4.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance4.SpanTags["destination.workload.namespace"].StringValue = "ns2";
+
+            var telemetry = telemetryGenerator.Generate(instance1, instance2, instance3, instance4).ToList();
+
+            // ASSERT
+            Assert.AreEqual(0 + 1 + 1 + 2, telemetry.Count);
+
+            Assert.IsTrue(telemetry[0] is DependencyTelemetry);
+
+            Assert.IsTrue(telemetry[1] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[2] is DependencyTelemetry);
+            Assert.IsTrue(telemetry[3] is RequestTelemetry);
+        }
+
         [TestMethod]
         public void TelemetryGeneratorTests_PutsReponseHeaderRequestContextIntoDependencyTarget()
         {
