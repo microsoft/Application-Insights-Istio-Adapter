@@ -24,10 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Signing", "Signing\Signing.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kubernetes", "kubernetes", "{6DA57F72-E7D5-4359-A286-013B66BB31E2}"
 	ProjectSection(SolutionItems) = preProject
+		kubernetes\applicationinsightsadapter.yaml = kubernetes\applicationinsightsadapter.yaml
+		kubernetes\configuration.yaml = kubernetes\configuration.yaml
 		kubernetes\application-insights-istio-mixer-adapter-deployment.yaml = kubernetes\application-insights-istio-mixer-adapter-deployment.yaml
-		kubernetes\attributes.yaml = kubernetes\attributes.yaml
 		installation.md = installation.md
-		kubernetes\sample_operator_cfg.yaml = kubernetes\sample_operator_cfg.yaml
 		kubernetes\template.yaml = kubernetes\template.yaml
 	EndProjectSection
 EndProject
