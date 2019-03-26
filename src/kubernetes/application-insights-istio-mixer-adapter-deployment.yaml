@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: application-insights-istio-mixer-adapter
-        image: alkaplan/application-insights-istio-mixer-adapter:dev
+        image: alkaplan/application-insights-istio-mixer-adapter:pp1
         imagePullPolicy: "Always" # //!!!
         ports:
         - name: http2-in-port

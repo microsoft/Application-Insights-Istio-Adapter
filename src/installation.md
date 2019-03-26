@@ -10,7 +10,7 @@
 - Follow instructions here: https://istio.io/docs/setup/kubernetes/.
 
 ### Configure your namespace for Istio sidecar autoinjection
-- For the namespace that contains your application(s) which need to be monitored, add the *istio-injection* label
+- For the namespace that contains your application(s) which need(s) to be monitored, add the *istio-injection* label
   `kubectl label namespace my-app-namespace istio-injection=enabled`
 
 ### Deploy your application
