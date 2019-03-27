@@ -2,7 +2,7 @@
 # Application Insights adapter for Istio Mixer
 Application Insights adapter for Istio Mixer is an adapter designed to collect Application Insights telemetry in Istio-enabled Kubernetes clusters, including AKS clusters.
 
-Please see SETUP.MD for details.
+Please see SETUP.md for details.
 
 # Contributing
 
