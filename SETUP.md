@@ -95,14 +95,14 @@ is found on the *Overview* blade of the Application Insights resource in Azure P
 
 ## FAQ
 - *Are other service meshes supported?* We have supported Istio as our first service mesh; we are currently looking at others (Linkerd, Consul) and expect to expand support soon.
-- *Can I separate telemetry between multiple instrumentation keys (Application Insights resources)?* Support for individually configurable instrumentation key (by Kubernetes namespace) is coming soon. 
+- *Can I separate telemetry between multiple instrumentation keys (Application Insights resources)?* Support for individually configurable instrumentation keys (by Kubernetes namespace) is coming soon. 
 As of right now, you can manually manipulate YAML configuration to set up multiple instances of the adapter and register them with Istio's Mixer. Each adapter can then have a separate configuration, 
 each containing its own namespace and instrumentation key.
-- *Are Windows containers supported?*
-- *Distributed tracing support for other apps such as java, nodejs*
-- *Integration with Container Insights*
-- *Support for other protocols – TCP, https*
-- *Will I have to whitelist my outgoing calls if I install Istio?*
+- *Are Windows containers supported?* Since only Istio is supported currently, and Istio does not offer support for Windows containers - the answer is no. As soon as supported service meshes are compatible
+with Windows containers this scenario will be enabled.
+- *Distributed tracing support* Support for distributed tracing is coming soon. Currently, only Application Map is supported, not full distributed tracing chains.
+- *Support for other protocols – Redis, mongoDB, HTTPS, etc.* Since telemetry is lifted off the wire, encrypted protocols (like HTTPS) cannot be supported. For internal traffic use plain unecnrypted protocols (like HTTP); 
+for external traffic that must be encrypted consider setting up SSL termination at the ingress gateway. Support for some of the most popular non-HTTP protocols is coming.
 
 ## Uninstall
 To uninstall the product, run *kubectl delete -f <filename.yaml>* for *every* YAML file found under *src/kubernetes/*.
