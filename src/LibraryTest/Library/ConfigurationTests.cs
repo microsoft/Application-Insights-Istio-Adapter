@@ -27,9 +27,9 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             }
 
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY", null, EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT", "23", EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT", "25", EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT", "25", EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED", null, EnvironmentVariableTarget.Process);
 
             // ACT
             var config = new Configuration(defaultConfig);
@@ -41,14 +41,16 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             Assert.AreEqual("%ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY%", config.InstrumentationKey);
             Assert.AreEqual("%ISTIO_MIXER_PLUGIN_AI_LIVE_METRICS_STREAM_AUTH_KEY%", config.LiveMetricsStreamAuthenticationApiKey);
             Assert.AreEqual("%ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES%", config.Watchlist_Namespaces.Single());
-            Assert.AreEqual(false, config.AdaptiveSampling_Enabled);
-            Assert.AreEqual(23, config.AdaptiveSampling_MaxEventsPerSecond);
+            Assert.AreEqual("%ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED%", config.Watchlist_IgnoredNamespaces.Single());
+
+            Assert.AreEqual(true, config.AdaptiveSampling_Enabled);
+            Assert.AreEqual(10, config.AdaptiveSampling_MaxEventsPerSecond);
             Assert.AreEqual(25, config.AdaptiveSampling_MaxOtherItemsPerSecond);
 
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY", null, EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT", null, EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT", null, EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED", null, EnvironmentVariableTarget.Process);
         }
 
         [TestMethod]
@@ -64,7 +66,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -100,7 +102,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -132,7 +134,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";

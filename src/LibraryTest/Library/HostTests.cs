@@ -34,7 +34,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -76,7 +76,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -93,7 +93,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             request.Instances.Add(new InstanceMsg()
             {
                 HttpStatusCode = 203,
-                SpanTags = { { "source.workload.name", new Value { StringValue = "some-app" } }, { "destination.workload.name", new Value { StringValue = "some-other-app" } } }
+                SpanTags = { { "source.name", new Value { StringValue = "some-app-1" } }, { "destination.name", new Value { StringValue = "some-other-app-1" } } }
             });
 
             // ASSERT
@@ -123,7 +123,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";

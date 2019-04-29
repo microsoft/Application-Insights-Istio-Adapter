@@ -13,12 +13,19 @@ spec:
   spanName: (request.method | "") + " " + (request.scheme | "" ) + "://" + (request.host | "") + (request.path | "")
   startTime: request.time | context.time
   endTime: response.time | context.time
-  #clientSpan: (context.reporter.local | true) == false 
   rewriteClientSpanId: "false"
   spanTags:
-   source.role.name: source.labels["app"] | source.workload.name | source.uid | ""
+   source.uid: source.uid | ""
+   source.name: source.name | ""
+   source.workload.name: source.workload.name | ""
+   source.workload.namespace: source.workload.namespace | ""
+   destination.uid: destination.uid | ""
+   destination.name: destination.name | ""
+   destination.workload.name: destination.workload.name | ""
+   destination.workload.namespace: destination.workload.namespace | ""
+   source.role.name: source.labels["app"] | source.uid | ""
    source.role.instance: source.uid | ""
-   destination.role.name: destination.labels["app"] | destination.workload.name | destination.uid | ""
+   destination.role.name: destination.labels["app"] | destination.uid | ""
    destination.role.instance: destination.uid | ""
    context.reporter.kind: context.reporter.kind | "inbound"
    context.reporter.uid: context.reporter.uid | ""
@@ -26,7 +33,6 @@ spec:
    connection.event: connection.event | "open"
    source.labels.appinsights.monitoring.enabled: source.labels["appinsights/monitoring.enabled"] | ""
    destination.labels.appinsights.monitoring.enabled: destination.labels["appinsights/monitoring.enabled"] | ""
-   source.labels.appinsights.monitoring.isgateway: source.labels["appinsights/monitoring.isgateway"] | ""
    source.labels.istio.isingressgateway: source.labels["istio"] == "ingressgateway"
    request.headers.request.id: request.headers["Request-Id"] | request.headers["request-id"] | ""
    request.headers.synthetictest.runid: request.headers["SyntheticTest-RunId"] | request.headers["synthetictest-runid"] | ""
@@ -42,25 +48,13 @@ spec:
    request.scheme: request.scheme | ""
    request.path: request.path | ""
    response.size: response.size | 0
-   source.user: source.user | ""
-   source.version: source.labels["version"] | ""
-   source.workload.uid: source.workload.uid | ""
-   source.workload.name: source.workload.name | ""
-   source.workload.namespace: source.workload.namespace | ""
-   source.uid: source.uid | ""
    source.ip: source.ip | ip("0.0.0.0")
-   destination.uid: destination.uid | ""
    destination.ip: destination.ip | ip("0.0.0.0")
    destination.port: destination.port | 0
-   destination.workload.uid: destination.workload.uid | ""
-   destination.workload.name: destination.workload.name | ""
-   destination.workload.namespace: destination.workload.namespace | ""
+   destination.service.uid: destination.service.uid | ""
    destination.service.host: destination.service.host | ""
-   api.service: api.service | ""
-   api.operation: api.operation | ""
-   api.protocol: api.protocol | ""
-   # destination.container.name: destination.container.name | "" 
-   # destination.container.image: destination.container.image | ""
+   destination.service.name: destination.service.name | ""
+   destination.service.namespace: destination.service.namespace | ""
 ---
 
 # handler for adapter applicationinsightsadapter

@@ -34,7 +34,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -119,7 +119,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -158,7 +158,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -198,7 +198,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -238,7 +238,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -270,7 +270,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -302,7 +302,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
         }
 
         [TestMethod]
-        public async Task LibraryTests_LibraryProcessesRequestsCorrectlyMore()
+        public async Task LibraryTests_LibraryProcessesRequestsCorrectlyMoreNeeded()
         {
             Assert.Inconclusive("More regorous testing needed once requirements are defined - ingress/egress calls, complex namespace/label scenarios, etc. Model test: LibraryTests_LibraryProcessesRequestsCorrectly");
         }
@@ -327,7 +327,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";
@@ -371,7 +371,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
     <AdaptiveSampling Enabled=""true"">
       <MaxEventsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_EVENTS_LIMIT%</MaxEventsPerSecond>
       <!--Telemetry items other than events are counted together-->
-      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_NON_EVENTS_LIMIT%</MaxOtherItemsPerSecond>
+      <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
 </Configuration>
 ";

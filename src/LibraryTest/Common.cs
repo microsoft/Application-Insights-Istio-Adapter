@@ -85,8 +85,9 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest
                     {"connection.event", new Value() {StringValue = ""}},
 
                     {"source.uid", new Value() {StringValue = "kubernetes://source-deployment-1"}},
-                    {"source.workload.namespace", new Value() {StringValue = "default"}},
+                    {"source.name", new Value() {StringValue = "source-deployment-1"}},
                     {"source.workload.name", new Value() {StringValue = "source-deployment"}},
+                    {"source.workload.namespace", new Value() {StringValue = "default"}},
                     {"source.labels.appinsights.monitoring.enabled", new Value() {StringValue = ""}},
                     {"source.labels.istio.isingressgateway", new Value() {BoolValue = false}},
                     {"source.role.name", new Value() {StringValue = "source"}},
@@ -94,14 +95,19 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest
                     {"source.ip", new Value() {IpAddressValue= new IPAddress()}},
 
                     {"destination.uid", new Value() {StringValue = "kubernetes://destination-deployment-1"}},
+                    {"destination.name", new Value() {StringValue = "destination-deployment-1"}},
+                    {"destination.workload.name", new Value() {StringValue = "destination-deploymen"}},
                     {"destination.workload.namespace", new Value() {StringValue = "default"}},
-                    {"destination.workload.name", new Value() {StringValue = "destination-deployment"}},
                     {"destination.labels.appinsights.monitoring.enabled", new Value() {StringValue = ""}},
                     {"destination.role.name", new Value() {StringValue = "destination"}},
                     {"destination.role.instance", new Value() {StringValue = "destination-1"}},
                     {"destination.port", new Value() {StringValue = "80"}},
                     {"destination.ip", new Value() {IpAddressValue= new IPAddress()}},
-                    {"destination.service.host", new Value() {StringValue = ""}},
+
+                    {"destination.service.uid", new Value() {StringValue = "kubernetes://default/services/some-service"}},
+                    {"destination.service.host", new Value() {StringValue = "some-service.default.svc.cluster.local"}},
+                    {"destination.service.name", new Value() {StringValue = "some-service"}},
+                    {"destination.service.namespace", new Value() {StringValue = "default"}},
 
                     {"http.useragent", new Value() {StringValue = "Mozilla"}},
                     {"http.status_code", new Value() {StringValue = "203"}},
@@ -120,10 +126,6 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest
 
                     {"response.headers.request.context", new Value() {StringValue = ""}},
                     {"response.size", new Value() {Int64Value= 0}},
-
-                    {"api.service", new Value() {StringValue= ""}},
-                    {"api.protocol", new Value() {StringValue= ""}},
-
                 }
             };
         }

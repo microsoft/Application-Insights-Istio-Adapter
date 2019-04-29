@@ -49,7 +49,7 @@
             Diagnostics.LogInfo(
                 FormattableString.Invariant($"Loaded configuration. {Environment.NewLine}{configuration}"));
 
-            this.telemetryGenerator = new TelemetryGenerator(this.config.Watchlist_Namespaces);
+            this.telemetryGenerator = new TelemetryGenerator(this.config.Watchlist_Namespaces, this.config.Watchlist_IgnoredNamespaces);
 
             try
             {

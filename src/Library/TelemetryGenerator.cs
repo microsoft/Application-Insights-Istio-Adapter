@@ -1,27 +1,26 @@
-﻿namespace Microsoft.IstioMixerPlugin.Library
+﻿// #define DEBUG_INFO
+
+namespace Microsoft.IstioMixerPlugin.Library
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Web;
-    using System.Xml.Linq;
     using ApplicationInsights.Channel;
     using ApplicationInsights.DataContracts;
     using ApplicationInsights.Extensibility.Implementation;
     using Common;
-    using Google.Protobuf;
     using Tracespan;
     using static System.FormattableString;
 
     internal class TelemetryGenerator
     {
+        private const string UnknownValue = "unknown";
+
         private readonly string[] targetNamespaces;
+        private readonly string[] ignoredNamespaces;
 
         private static readonly Random rand = new Random();
         private static readonly object sync = new object();
@@ -30,9 +29,10 @@
 
         private static readonly Regex requestContextAppIdRegex = new Regex("^appId=(?<appId>.+)$", RegexOptions.Compiled);
 
-        public TelemetryGenerator(params string[] targetNamespaces)
+        public TelemetryGenerator(string[] targetNamespaces, string[] ignoredNamespaces)
         {
             this.targetNamespaces = targetNamespaces ?? new string[0];
+            this.ignoredNamespaces = ignoredNamespaces ?? new string[0];
         }
 
         public IEnumerable<ITelemetry> Generate(params InstanceMsg[] instances)
@@ -47,9 +47,20 @@
         /// <returns></returns>
         public IEnumerable<ITelemetry> Generate(InstanceMsg instance)
         {
-            //!!! perf, consider removing in production
+#if DEBUG_INFO
             var debugInfo = instance.ToString();
-            
+#endif
+
+            var sourceUid = instance.SpanTags["source.uid"].StringValue;
+            var sourceName = instance.SpanTags["source.name"].StringValue;
+            var sourceWorkloadName = instance.SpanTags["source.workload.name"].StringValue;
+            var sourceWorkloadNamespace = instance.SpanTags["source.workload.namespace"].StringValue;
+
+            var destinationUid = instance.SpanTags["destination.uid"].StringValue;
+            var destinationName = instance.SpanTags["destination.name"].StringValue;
+            var destinationWorkloadName = instance.SpanTags["destination.workload.name"].StringValue;
+            var destinationWorkloadNamespace = instance.SpanTags["destination.workload.namespace"].StringValue;
+
             var contextReporterUid = instance.SpanTags["context.reporter.uid"].StringValue;
             var contextReporterKind = instance.SpanTags["context.reporter.kind"].StringValue.ToLowerInvariant();
 
@@ -57,19 +68,10 @@
 
             //var connectionEvent = instance.SpanTags["connection.event"].StringValue.ToLowerInvariant();
 
-            var sourceUid = instance.SpanTags["source.uid"].StringValue;
-            var destinationUid = instance.SpanTags["destination.uid"].StringValue;
-
-            var sourceWorkloadNamespace = instance.SpanTags["source.workload.namespace"].StringValue;
-            var sourceWorkloadName = instance.SpanTags["source.workload.name"].StringValue;
-
-            var destinationWorkloadNamespace = instance.SpanTags["destination.workload.namespace"].StringValue;
-            var destinationWorkloadName = instance.SpanTags["destination.workload.name"].StringValue;
-
+            //!!! configure the adapter to receive less trace spans through configuration (rules, etc), not filter them here. That would save bandwidth and mixer CPU
             var sourceAppInsightsMonitoringEnabled = instance.SpanTags["source.labels.appinsights.monitoring.enabled"].StringValue;
             var destinationAppInsightsMonitoringEnabled = instance.SpanTags["destination.labels.appinsights.monitoring.enabled"].StringValue;
 
-            // sourceAppInsightsMonitoringIsGateway = strings.ToLower(instance.SpanTags["source.labels.appinsights.monitoring.isgateway"].StringValue;) == "true"
             var isSourceIstioIngressGateway = instance.SpanTags["source.labels.istio.isingressgateway"].BoolValue;
 
             var requestHeadersRequestId = instance.SpanTags["request.headers.request.id"].StringValue;
@@ -103,11 +105,10 @@
                 }
             }
 
-            //!!! is this necessary? Also, perf
-            var strippedSourceRoleName = instance.SpanTags["source.role.name"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
-            var strippedSourceRoleInstance = instance.SpanTags["source.role.instance"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
-            var strippedDestinationRoleName = instance.SpanTags["destination.role.name"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
-            var strippedDestinationRoleInstance = instance.SpanTags["destination.role.instance"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
+            var sourceRoleName = instance.SpanTags["source.role.name"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
+            var sourceRoleInstance = instance.SpanTags["source.role.instance"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
+            var destinationRoleName = instance.SpanTags["destination.role.name"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
+            var destinationRoleInstance= instance.SpanTags["destination.role.instance"].StringValue.ToLowerInvariant().Replace("kubernetes://", string.Empty);
 
             var httpUserAgent = instance.SpanTags["http.useragent"].StringValue;
             var host = instance.SpanTags["host"].StringValue;
@@ -118,41 +119,44 @@
             var requestScheme = instance.SpanTags["request.scheme"].StringValue;
             
             var destinationPort = instance.SpanTags["destination.port"].Int64Value;
-            
+
+            var destinatonServiceUid = instance.SpanTags["destination.service.uid"].StringValue;
+            var destinatonServiceHost = instance.SpanTags["destination.service.host"].StringValue;
+            var destinatonServiceName = instance.SpanTags["destination.service.name"].StringValue;
+            var destinatonServiceNamespace = instance.SpanTags["destination.service.namespace"].StringValue;
+
             // if source/desination information is insufficient, let's assume it's an external caller/dependency and use whatever little we know about them
-            if (string.IsNullOrWhiteSpace(strippedSourceRoleName) || string.Equals(strippedSourceRoleName, "unknown", StringComparison.InvariantCultureIgnoreCase))
+            if (string.IsNullOrWhiteSpace(sourceRoleName) || string.Equals(sourceRoleName, UnknownValue, StringComparison.InvariantCultureIgnoreCase))
             {
-                strippedSourceRoleName = httpUserAgent;
+                sourceRoleName = httpUserAgent;
             }
 
-            if (string.IsNullOrWhiteSpace(strippedSourceRoleInstance) || string.Equals(strippedSourceRoleInstance, "unknown", StringComparison.InvariantCultureIgnoreCase))
+            if (string.IsNullOrWhiteSpace(sourceRoleInstance) || string.Equals(sourceRoleInstance, UnknownValue, StringComparison.InvariantCultureIgnoreCase))
             {
-                strippedSourceRoleInstance = httpUserAgent;
+                sourceRoleInstance = httpUserAgent;
             }
 
-            if (string.IsNullOrWhiteSpace(strippedDestinationRoleName) || string.Equals(strippedDestinationRoleName, "unknown", StringComparison.InvariantCultureIgnoreCase))
+            if (string.IsNullOrWhiteSpace(destinationRoleName) || string.Equals(destinationRoleName, UnknownValue, StringComparison.InvariantCultureIgnoreCase))
             {
-                strippedDestinationRoleName = host;
+                destinationRoleName = host;
             }
 
-            if (string.IsNullOrWhiteSpace(strippedDestinationRoleInstance) || string.Equals(strippedDestinationRoleInstance, "unknown", StringComparison.InvariantCultureIgnoreCase))
+            if (string.IsNullOrWhiteSpace(destinationRoleInstance) || string.Equals(destinationRoleInstance, UnknownValue, StringComparison.InvariantCultureIgnoreCase))
             {
-                strippedDestinationRoleInstance = host;
+                destinationRoleInstance = host;
             }
 
             // if none of the workloads have anything to do with us, skip the instance completely
             this.DetermineInterest(contextReporterUid, sourceWorkloadNamespace, destinationWorkloadNamespace, sourceAppInsightsMonitoringEnabled, destinationAppInsightsMonitoringEnabled,
                 out bool isInstanceInteresting, out bool isInstanceFullyWithinTargetArea, out bool isSourceWithinTargetArea, out bool isDestinationWithinTargetArea);
 
-            Diagnostics.LogTrace($"source: {sourceWorkloadName}, destination: {destinationWorkloadName}, reporter: {contextReporterUid}, kind: {contextReporterKind}");
+            Diagnostics.LogTrace($"source: {sourceName}.{sourceWorkloadNamespace}, destination: {destinationName}.{destinationWorkloadNamespace}, reporter: {contextReporterUid}, kind: {contextReporterKind}");
 
             //if (contextProtocol == "tcp")
             //{
-            //    //!!!
             //    Diagnostics.LogTrace(Invariant($"TCP. {debugInfo}"));
             //}
 
-            //!!! do we want TCP?
             if (!isInstanceInteresting || !contextProtocol.StartsWith("http") /*|| (contextProtocol == "tcp" && connectionEvent != "open")*/)
             {
                 Diagnostics.LogTrace("SKIPPED");
@@ -165,7 +169,7 @@
             string incomingRequestId = incomingRequestIdPresent ? requestHeadersRequestId : Invariant($"|{RandomStringLong()}.");
 
             string url = Invariant(
-                $@"{contextProtocol}{(string.IsNullOrWhiteSpace(contextProtocol) ? string.Empty : "://")}{strippedDestinationRoleInstance}{httpPath}{
+                $@"{contextProtocol}{(string.IsNullOrWhiteSpace(contextProtocol) ? string.Empty : "://")}{destinationRoleInstance}{httpPath}{
                         (destinationPort > 0 ? $":{destinationPort}" : string.Empty)
                     }");
 
@@ -191,11 +195,27 @@
             {
                 var debugData = new Dictionary<string, string>()
                 {
-                    {"aks.debug.context.reporter.kind", contextReporterKind},
-                    {"aks.debug.context.reporter.uid", contextReporterUid},
-                    {"aks.debug.context.source.uid", sourceUid},
-                    {"aks.debug.context.destination.uid", destinationUid},
+                    {"k8s.context.reporter.kind", contextReporterKind},
+                    {"k8s.context.reporter.uid", contextReporterUid},
+
+                    {"k8s.source.uid", sourceUid},
+                    {"k8s.source.name", sourceName},
+                    {"k8s.source.workload.name", sourceWorkloadName},
+                    {"k8s.source.workload.namespace", sourceWorkloadNamespace},
+
+                    {"k8s.destination.uid", destinationUid},
+                    {"k8s.destination.name", destinationName},
+                    {"k8s.destination.workload.name", destinationWorkloadName},
+                    {"k8s.destination.workload.namespace", destinationWorkloadNamespace},
+
+                    {"k8s.destination.service.uid", destinatonServiceUid},
+                    {"k8s.destination.service.host", destinatonServiceHost},
+                    {"k8s.destination.service.name", destinatonServiceName},
+                    {"k8s.destination.service.namespace", destinatonServiceNamespace},
+
+#if DEBUG_INFO
                     {"aks.debug.info", debugInfo}
+#endif
                 };
 
                 DateTimeOffset? startTime = instance.StartTime?.Value?.ToDateTimeOffset();
@@ -203,22 +223,26 @@
 
                 string latestRequestId = incomingRequestId;
 
+                var log = new StringBuilder();
+
                 // if the source is an Istio Ingress Gateway we want to generate an additional pair of dependency/request on its behalf
                 // as if it's within our target area (we want to see it on the App Map)
                 if (isSourceIstioIngressGateway)
                 {
+                    log.Append(" RD(G) ");
+
                     // we are generating a request/dependency pair for the Istio Ingress Gateway
                     // the instance represents the call: gateway -> pod (reported by inbound proxy of the pod)
 
                     // on behalf of the gateway, report server span (request)
                     // the request will represent the gateway's side of the call: internet -> gateway
                     string gatewayRequestId = incomingRequestIdPresent ? AcknowledgeRequest(incomingRequestId) : incomingRequestId;
-                    yield return this.GenerateRequest(spanName: strippedDestinationRoleInstance,
+                    yield return this.GenerateRequest(spanName: destinationRoleInstance,
                         requestId: gatewayRequestId,
                         parentRequestId: incomingRequestIdPresent ? incomingRequestId : string.Empty,
                         spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
-                        roleName: strippedSourceRoleName, 
-                        roleInstance: strippedSourceRoleInstance, 
+                        roleName: sourceRoleName, 
+                        roleInstance: sourceRoleInstance, 
                         httpUrl: url, httpHost: host,
                         httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
                         httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
@@ -227,13 +251,13 @@
                     // on behalf of the Gateway, report client span (dependency call)
                     // the dependency will represent the gateway's side of the call: gateway -> pod
                     string requestId = StartDependency(gatewayRequestId);
-                    yield return this.GenerateDependency(spanName: strippedDestinationRoleInstance, 
+                    yield return this.GenerateDependency(spanName: destinationRoleInstance, 
                         requestId: requestId,
                         parentRequestId: gatewayRequestId,
                         spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime,
                         endTime: endTime,
-                        roleName: strippedSourceRoleName,
-                        roleInstance: strippedSourceRoleInstance,
+                        roleName: sourceRoleName,
+                        roleInstance: sourceRoleInstance,
                         httpUrl: url,
                         httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
                         protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
@@ -249,6 +273,8 @@
                 bool isIngressRequest = !isSourceWithinTargetArea && isDestinationWithinTargetArea;
                 if (!isIngressRequest)
                 {
+                    log.Append(" D ");
+
                     string requestId = StartDependency(latestRequestId);
 
                     //!!! Temporary support of app propagating Request-Id
@@ -259,12 +285,12 @@
                     }
                     /////////// end of temporary support
                     
-                    yield return this.GenerateDependency(spanName: strippedDestinationRoleInstance, 
+                    yield return this.GenerateDependency(spanName: destinationRoleInstance, 
                         requestId: requestId,
                         parentRequestId: latestRequestId,
                         spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime, 
-                        roleName: strippedSourceRoleName, 
-                        roleInstance: strippedSourceRoleInstance, 
+                        roleName: sourceRoleName, 
+                        roleInstance: sourceRoleInstance, 
                         httpUrl: url,
                         httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
                         protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
@@ -278,19 +304,22 @@
                 // otherwise it's an external dependency and we don't want to generate requests for it
                 if (isDestinationWithinTargetArea)
                 {
+                    log.Append(" R ");
                     // we only want to propagate synthetic context if this is a direct call from a synthetic probe (not through a gateway)
                     // if it's a synthetic call through a gateway, the gateway will be the one for which we've propagated synthetic context above
-                    yield return this.GenerateRequest(spanName: strippedDestinationRoleInstance, 
+                    yield return this.GenerateRequest(spanName: destinationRoleInstance, 
                         requestId: AcknowledgeRequest(latestRequestId),
                         parentRequestId: latestRequestId,
                         spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
-                        roleName: strippedDestinationRoleName, 
-                        roleInstance: strippedDestinationRoleInstance, 
+                        roleName: destinationRoleName, 
+                        roleInstance: destinationRoleInstance, 
                         httpUrl: url, httpHost: host,
                         httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
                         httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
                         requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: !isSourceIstioIngressGateway, debugData: debugData);
                 }
+
+                Diagnostics.LogTrace(log.ToString());
             }
         }
 
@@ -412,6 +441,9 @@
             bool destinationIsWithinTargetNamespace =
                 this.targetNamespaces.Length == 0 || this.targetNamespaces.Any(ns => string.Equals(destinationNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
 
+            bool sourceIsWithinIgnoredNamespace = this.ignoredNamespaces.Any(ns => string.Equals(sourceNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
+            bool destinationIsWithinIgnoredNamespace = this.ignoredNamespaces.Any(ns => string.Equals(destinationNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
+
             bool sourceIsPositivelyLabeled = bool.TryParse(sourceAppInsightsMonitoringEnabled, out bool sourceAppInsightsMonitoringEnabledParsed) && sourceAppInsightsMonitoringEnabledParsed;
             bool destinationIsPositivelyLabeled = bool.TryParse(destinationAppInsightsMonitoringEnabled, out bool destinationAppInsightsMonitoringEnabledParsed) &&
                                                   destinationAppInsightsMonitoringEnabledParsed;
@@ -420,8 +452,11 @@
             bool destinationIsNegativelyLabeled =
                 bool.TryParse(destinationAppInsightsMonitoringEnabled, out destinationAppInsightsMonitoringEnabledParsed) && !destinationAppInsightsMonitoringEnabledParsed;
 
-            bool sourceIsInteresting = sourceIsPositivelyLabeled || sourceIsWithinTargetNamespace && !sourceIsNegativelyLabeled;
-            Boolean destinationIsInteresting = destinationIsPositivelyLabeled || destinationIsWithinTargetNamespace && !destinationIsNegativelyLabeled;
+            bool sourceIsInterestingBasedOnNamespace = sourceIsWithinTargetNamespace && !sourceIsWithinIgnoredNamespace;
+            bool destinationIsInterestingBasedOnNamespace = destinationIsWithinTargetNamespace && !destinationIsWithinIgnoredNamespace;
+
+            bool sourceIsInteresting = sourceIsPositivelyLabeled || sourceIsInterestingBasedOnNamespace && !sourceIsNegativelyLabeled;
+            bool destinationIsInteresting = destinationIsPositivelyLabeled || destinationIsInterestingBasedOnNamespace && !destinationIsNegativelyLabeled;
 
             isInstanceInteresting = sourceIsInteresting || destinationIsInteresting;
             isInstanceFullyWithinTargetArea = sourceIsInteresting && destinationIsInteresting;
@@ -429,8 +464,8 @@
             isSourceWithinTargetArea = sourceIsInteresting;
             isDestinationWithinTargetArea = destinationIsInteresting;
         }
-        #region Helpers
 
+        #region Helpers
         private void SetSyntheticContext(RequestTelemetry telemetry, string requestHeadersSyntheticTestRunId, string requestHeadersSyntheticTestLocation)
         {
             // replicated behavior: https://github.com/Microsoft/ApplicationInsights-aspnetcore/blob/master/src/Microsoft.ApplicationInsights.AspNetCore/TelemetryInitializers/SyntheticTelemetryInitializer.cs

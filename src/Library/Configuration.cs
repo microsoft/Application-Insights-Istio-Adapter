@@ -98,6 +98,22 @@
             }
         }
 
+        public string[] Watchlist_IgnoredNamespaces
+        {
+            get
+            {
+                try
+                {
+                    return this.configuration.Element("Watchlist")?.Element("IgnoredNamespaces")?.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(ns => ns.Trim()).ToArray() ?? new string[0];
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException(
+                        FormattableString.Invariant($"Could not find or convert the data field {MethodBase.GetCurrentMethod().Name} in configuration. {this.configuration.Value}"), e);
+                }
+            }
+        }
+
         public bool? AdaptiveSampling_Enabled
         {
             get
