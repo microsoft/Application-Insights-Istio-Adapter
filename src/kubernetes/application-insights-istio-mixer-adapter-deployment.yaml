@@ -27,7 +27,7 @@ spec:
         - name: ISTIO_MIXER_PLUGIN_AI_LIVE_METRICS_STREAM_AUTH_KEY
           value: ""
         - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES
-          value: "default" # comma-separated list of Kubernetes namespaces to monitor. Leave empty if all namespaces must be monitored
+          value: "" # comma-separated list of Kubernetes namespaces to monitor. Leave empty if all namespaces must be monitored
         - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED
           value: "istio-system,kube-system" # comma-separated list of Kubernetes namespaces to ignore (has priority over ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES)
         # Note: to include or exclude telemetry for an individual pod from being collected, use *appinsights/monitoring.enabled* label on that pod. This will have priority over all namespace-based configuration. Set *appinsights/monitoring.enabled* to *true* to include the pod, and to *false* to exclude it.
