@@ -1,15 +1,15 @@
 # Application Insights for Kubernetes
 Application Insights for Kubernetes is a monitoring solution that allows you to collect Application Insights telemetry pertaining to
 incoming and outgoing requests to and from pods running in your Kubernetes cluster without the need for instrumenting the
-application with an SDK. We utilize service mesh technology called Istio to collect data, so the only requirement is that your
+application with an SDK. We utilize a service mesh technology called Istio to collect data, so the only requirement is that your
 Kubernetes deployment is configured to run with Istio (there are few simple requirements, see below for details).
 
 *If you are not familiar with Application Insights, see [here](https://docs.microsoft.com/azure/azure-monitor/app/app-insights-overview).*
 
-Since service mesh lifts data off the wire, we can not intercept encrypted traffic. For traffic that doesn't leave the cluster,
+Since a service mesh lifts data off the wire, we can not intercept encrypted traffic. For traffic that doesn't leave the cluster,
 use plain unencrypted protocol (e.g. HTTP). For external traffic that must be encrypted, consider setting up SSL termination at the ingress controller.
 
-Applications running outside of the service mesh are not affected.
+Applications running outside of the service mesh are not monitored.
 
 ## Prerequisites
 - a Kubernetes cluster
@@ -23,8 +23,7 @@ To enable the solution, we'll be performing the following steps:
 - observe collected telemetry
 
 ### Deploy Istio
-We are currently using Istio as the service mesh technology. If your cluster doesn't have Istio deployed, follow installation
-instructions here: https://istio.io/docs/setup/kubernetes/.
+We are currently using Istio as the service mesh technology. If your cluster doesn't have Istio deployed, follow the installations here: https://istio.io/docs/setup/kubernetes/.
 
 ### Configure your app to work with Istio
 Istio supports two ways of instrumenting a pod (see [here](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/)).
@@ -58,7 +57,7 @@ monitor all namespaces.
 1. Ensure that you've installed the [Helm CLI](https://github.com/helm/helm#install) on your development machine.
 2. Download and extract an *Application Insights for Kubernetes* release from [here](https://github.com/Microsoft/Application-Insights-Istio-Adapter/releases/).
 3. Navigate to the `kubernetes-helm` directory.
-4. Edit the `values.yaml` file, adding in your Application Insights Key, namespaces you'd like to watch, namespaces you'd like to ignore,
+4. Edit the `values.yaml` file, adding in your Application Insights Key, namespaces you'd like to watch, namespaces you'd like to ignore, etc.
 5. Run `helm template . > application-insights-istio-mixer.yaml`
 6. Apply the generated yaml to your cluster: `kubectl apply -f application-insights-istio-mixer.yaml`
 
@@ -73,8 +72,8 @@ In some cases, finer tuning is required. To include or exclude telemetry for an 
 use *appinsights/monitoring.enabled* label on that pod. This will have priority over all namespace-based configuration. Set *appinsights/monitoring.enabled* to *true* to include the pod, and to *false* to exclude it.
 
 ### View Application Insights telemetry
-- issue requests against the application being monitored, or otherwise produce load on the application
-- within 3-5 minutes you should start seeing telemetry appear in Azure Portal. Be sure to check out the *Application Map* section of your Application Insights resource in the Portal.
+- Issue requests against the application being monitored, or otherwise produce load on the application
+- Within 3 to 5 minutes you should start seeing telemetry appear in Azure Portal. Be sure to check out the *Application Map* section of your Application Insights resource in the Portal.
 
 ### Troubleshooting
 Below is the troubleshooting flow to use when telemetry doesn't appear in Azure Portal as expected.
@@ -116,5 +115,19 @@ with Windows containers this scenario will be enabled.
 for external traffic that must be encrypted consider setting up SSL termination at the ingress gateway. Support for some of the most popular non-HTTP protocols is coming.
 
 ## Uninstall
-To uninstall the product, run *kubectl delete -f <filename.yaml>* for *every* YAML file found under *src/kubernetes/*.
+
+### Uninstall from individual manifests
+
+This uninstallation method presumes you [installed via the included kubernetes manifests](#deploy-application-insights-for-kubernetes-using-kubernetes-manifests)
+
+Run `kubectl delete -f src/kubernetes/ -R`.
+
+### Uninstall from the rendered helm manifests
+
+This uninstallation method presumes you [installed via the included helm chart](#deploy-application-insights-for-kubernetes-using-the-included-helm-chart)
+
+Run `kubectl delete -f kubernetes-helm/application-insights-istio-mixer.yaml`
+
+### Uninstall istio
+
 To uninstall Istio, follow instructions here: https://istio.io/docs/setup/kubernetes/install/helm/#uninstall.
