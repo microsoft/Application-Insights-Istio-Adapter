@@ -34,6 +34,6 @@ spec:
         - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED
           value: {{ .Values.instrumentation.ignoredNamespaces | quote }}
         - name: ISTIO_MIXER_PLUGIN_LOG_LEVEL
-          value: {{ .Values.instrumentation.logLevel | quote}}
+          value: {{ .Values.instrumentation.logLevel | quote }}
         - name: ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT
           value: {{ .Values.instrumentation.adaptiveSamplingLimit | quote }}

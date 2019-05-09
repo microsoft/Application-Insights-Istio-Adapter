@@ -52,11 +52,15 @@ monitor all namespaces.
    ```
 
 ### Deploy Application Insights for Kubernetes using the included Helm Chart
+
+[Helm](https://helm.sh/) is a Package Management tool for Kubernetes. Helm distributes software as Charts, which are packages of templated Kubernetes Manifests.
+
 1. Ensure that you've installed the [Helm CLI](https://github.com/helm/helm#install) on your development machine.
-2. Navigate to the `kubernetes-helm` directory.
-3. Edit the `values.yaml` file, adding in your Application Insights Key, namespaces you'd like to watch, namespaces you'd like to ignore, etc.
-4. Run `helm template . > application-insights-istio-mixer.yaml`
-5. Apply the generated yaml to your cluster: `kubectl apply -f application-insights-istio-mixer.yaml`
+2. Download and extract an *Application Insights for Kubernetes* release from [here](https://github.com/Microsoft/Application-Insights-Istio-Adapter/releases/).
+3. Navigate to the `kubernetes-helm` directory.
+4. Edit the `values.yaml` file, adding in your Application Insights Key, namespaces you'd like to watch, namespaces you'd like to ignore,
+5. Run `helm template . > application-insights-istio-mixer.yaml`
+6. Apply the generated yaml to your cluster: `kubectl apply -f application-insights-istio-mixer.yaml`
 
 ### Verify Application Insights for Kubernetes deployment
 - Ensure Application Insights for Kubernetes adapter has been deployed:
