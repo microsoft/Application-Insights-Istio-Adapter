@@ -4,7 +4,7 @@
     using System.IO;
     using System.Threading;
     using Library;
-
+    using Microsoft.IstioMixerPlugin.Library;
     class Program
     {
         static void Main(string[] args)
@@ -27,11 +27,13 @@
             {
                 Common.Diagnostics.LogInfo("Starting the host...");
 
-                string config = ReadConfiguratiion();
+                string config = ReadConfiguration();
 
                 host.Run(config, TimeSpan.FromSeconds(5));
 
                 Common.Diagnostics.LogInfo("The host is running");
+                string[] stuff = new string[] { "http://*:8899/doh/" };
+                WebServer ws = new WebServer(stuff);
             }
             catch (Exception e)
             {
@@ -77,7 +79,7 @@
             Common.Diagnostics.LogInfo("The console host has exited");
         }
 
-        private static string ReadConfiguratiion()
+        private static string ReadConfiguration()
         {
             try
             {
