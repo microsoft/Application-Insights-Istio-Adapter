@@ -7,6 +7,7 @@
     using Microsoft.IstioMixerPlugin.Common;
     using System.IO;
     using System.Runtime.Serialization.Json;
+    using Microsoft.IstioMixerPlugin.Library.Inputs;
 
     public class WebServer
     {
@@ -58,16 +59,15 @@
             StreamReader reader = new StreamReader(request.InputStream);
 
             DataContractJsonSerializer serializer =
-                new DataContractJsonSerializer(typeof(PayloadType));
-            PayloadType yourObject = (PayloadType)serializer.ReadObject(request.InputStream);
+                new DataContractJsonSerializer(typeof(JsonPayloadObject));
+            JsonPayloadObject payloadObject = (JsonPayloadObject)serializer.ReadObject(request.InputStream);
 
-            Diagnostics.LogInfo(FormattableString.Invariant($"received payload with id : {yourObject.id}"));
+            Diagnostics.LogInfo(FormattableString.Invariant($"received payload with id : {payloadObject.id}"));
 
-            // Obtain a response object.
             HttpListenerResponse response = context.Response;
-            // Construct a response.
             response.StatusCode = (int)HttpStatusCode.Accepted;
             response.Close();
+
             if (this.isRunning)
             {
                 listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
@@ -76,8 +76,4 @@
         }
     }
 
-    public class PayloadType
-    {
-        public int id;
-    }
 }
