@@ -28,8 +28,6 @@
                 throw new InvalidOperationException(logLine);
             }
 
-            // URI prefixes are required,
-            // for example "http://*:8080/index/".
             if (config == null || config.Length == 0)
             {
                 string logLine = FormattableString.Invariant($"config missing");
@@ -41,37 +39,76 @@
 
             // Create a listener.
             this.listener = new HttpListener();
-                this.listener.Prefixes.Add(this.config.HttpPrefix);
-            
-            this.listener.Start();
-            this.isRunning = true;
-            listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
+            this.listener.Prefixes.Add(this.config.HttpPrefix);
+
+            lock (this.listener)
+            {
+                try
+                {
+                    this.listener.Start();
+                    listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
+                    this.isRunning = true;
+                }
+                catch (Exception e)
+                {
+                    Diagnostics.LogError(e.ToString());
+                    // should not blow up if it cannot run the webserver
+                }
+            }
+
             Diagnostics.LogInfo(FormattableString.Invariant($"Webserver running"));
+        }
+
+        private void Stop()
+        {
+            lock (this.listener)
+            {
+                this.isRunning = false;
+                try
+                {
+                    this.listener.Close();
+                }
+                catch (Exception e)
+                {
+                    Diagnostics.LogError(e.ToString());
+                    // should not blow up if it cannot run the webserver
+                }
+            }
         }
 
         private void ListenerCallbackAsync(IAsyncResult result)
         {
-            HttpListener listener = (HttpListener)result.AsyncState;
-            // Call EndGetContext to complete the asynchronous operation.
-            HttpListenerContext context = listener.EndGetContext(result);
-            HttpListenerRequest request = context.Request;
-
-            DataContractJsonSerializer serializer =
-                new DataContractJsonSerializer(typeof(JsonPayloadObject));
-            JsonPayloadObject payloadObject = (JsonPayloadObject)serializer.ReadObject(request.InputStream);
-
-            Diagnostics.LogInfo(FormattableString.Invariant($"received payload with id : {payloadObject.id}"));
-
-            HttpListenerResponse response = context.Response;
-            response.StatusCode = (int)HttpStatusCode.Accepted;
-            response.Close();
-
-            if (this.isRunning)
+            lock (this.listener)
             {
-                listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
-                Diagnostics.LogInfo("Restarting listening");
+                try
+                {
+                    HttpListener listener = (HttpListener)result.AsyncState;
+                    // Call EndGetContext to complete the asynchronous operation.
+                    HttpListenerContext context = listener.EndGetContext(result);
+
+                    HttpListenerRequest request = context.Request;
+
+                    DataContractJsonSerializer serializer =
+                        new DataContractJsonSerializer(typeof(JsonPayloadObject));
+                    JsonPayloadObject payloadObject = (JsonPayloadObject)serializer.ReadObject(request.InputStream);
+
+                    Diagnostics.LogInfo(FormattableString.Invariant($"received payload with cluster id : {payloadObject.clusterId}"));
+
+                    HttpListenerResponse response = context.Response;
+                    response.StatusCode = (int)HttpStatusCode.Accepted;
+                    response.Close();
+                }
+                catch (Exception e)
+                {
+                    Diagnostics.LogError(e.ToString());
+                    // should not blow up if it cannot run the webserver
+                }
+                if (this.isRunning)
+                {
+                    this.listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
+                    Diagnostics.LogInfo("Restarting listening");
+                }
             }
         }
     }
-
 }

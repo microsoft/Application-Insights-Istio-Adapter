@@ -1,12 +1,14 @@
 ﻿namespace Microsoft.IstioMixerPlugin.Library.Inputs
 {
+    using System;
     public class JsonPayloadObject
     {
-        public int id = -1;
+
+        public  Guid clusterId = Guid.Empty;
 
         public override string ToString()
         {
-            return $"id : {this.id}";
+            return $"clusterId : {this.clusterId}";
         }
     }
 }
