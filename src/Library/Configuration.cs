@@ -50,6 +50,22 @@
             }
         }
 
+        public string HttpPrefix
+        {
+            get
+            {
+                try
+                {
+                    return this.configuration.Element("HttpPrefix").Value;
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException(
+                        FormattableString.Invariant($"Could not find or convert the data field {MethodBase.GetCurrentMethod().Name} in configuration. {this.configuration.Value}"), e);
+                }
+            }
+        }
+
         public string InstrumentationKey
         {
             get

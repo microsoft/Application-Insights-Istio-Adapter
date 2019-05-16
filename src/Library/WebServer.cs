@@ -13,7 +13,8 @@
     {
         private HttpListener listener;
         private volatile bool isRunning = false;
-        public WebServer(string[] prefixes)
+        private readonly Configuration config;
+        public WebServer(string config)
         {
             if (isRunning)
             {
@@ -29,21 +30,19 @@
 
             // URI prefixes are required,
             // for example "http://*:8080/index/".
-            if (prefixes == null || prefixes.Length == 0)
+            if (config == null || config.Length == 0)
             {
-                string logLine = FormattableString.Invariant($"WebServer prefixes missing");
+                string logLine = FormattableString.Invariant($"config missing");
                 Diagnostics.LogError(logLine);
                 throw new ArgumentException(logLine);
             }
 
+            this.config = new Configuration(config);
+
             // Create a listener.
             this.listener = new HttpListener();
-            // Add the prefixes.
-            foreach (string s in prefixes)
-            {
-                this.listener.Prefixes.Add(s);
-            }
-
+                this.listener.Prefixes.Add(this.config.HttpPrefix);
+            
             this.listener.Start();
             this.isRunning = true;
             listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);

@@ -32,8 +32,8 @@
                 host.Run(config, TimeSpan.FromSeconds(5));
 
                 Common.Diagnostics.LogInfo("The host is running");
-                string[] stuff = new string[] { "http://*:8899/doh/" };
-                WebServer ws = new WebServer(stuff);
+                
+                WebServer ws = new WebServer(config);
             }
             catch (Exception e)
             {
