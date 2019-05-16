@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.IstioMixerPlugin.Library.Inputs
 {
-    class JsonPayloadObject
+    public class JsonPayloadObject
     {
         public int id = -1;
 

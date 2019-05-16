@@ -56,7 +56,6 @@
             // Call EndGetContext to complete the asynchronous operation.
             HttpListenerContext context = listener.EndGetContext(result);
             HttpListenerRequest request = context.Request;
-            StreamReader reader = new StreamReader(request.InputStream);
 
             DataContractJsonSerializer serializer =
                 new DataContractJsonSerializer(typeof(JsonPayloadObject));
