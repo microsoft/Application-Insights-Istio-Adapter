@@ -4,7 +4,6 @@
     using System.IO;
     using System.Threading;
     using Library;
-    using Microsoft.IstioMixerPlugin.Library;
     class Program
     {
         static void Main(string[] args)
@@ -33,7 +32,8 @@
 
                 Common.Diagnostics.LogInfo("The host is running");
                 
-                WebServer ws = new WebServer(config);
+              //  WebServer ws = new WebServer(config);
+                //ws.Start();
             }
             catch (Exception e)
             {
