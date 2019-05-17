@@ -28,11 +28,13 @@
         private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
         private WebServer webServer;
         [TestInitialize]
-        public void init()
+        public void Init()
         {
             config = $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                         <Configuration>
-                            <HttpPrefix>http://*:8888/test/</HttpPrefix>
+                            <WebServer>
+                                <HttpListenerPrefix>http://*:8888/test/</HttpListenerPrefix>
+                            </WebServer>
                         </Configuration>
                         ";
             webServer = new WebServer(config);
@@ -40,7 +42,7 @@
         }
 
         [TestCleanup]
-        public void cleanup()
+        public void Cleanup()
         {
             webServer.Stop();
             Assert.IsFalse(webServer.IsRunning);
@@ -133,6 +135,35 @@
 
             HttpWebResponse httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             Assert.AreEqual<HttpStatusCode>(httpResponse.StatusCode, HttpStatusCode.Accepted);
+        }
+
+        [TestMethod]
+        public void WebServerTests_Write_Invalid_Json()
+        {
+            webServer.Start();
+            Assert.IsTrue(webServer.IsRunning);
+
+            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:8888/test/");
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = "POST";
+
+            using (StreamWriter streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                string json = "{\"clusterId\" : \"66010356-d8a5-42d3-8593-6aaa3aeb1c11";
+
+                streamWriter.Write(json);
+                streamWriter.Flush();
+                streamWriter.Close();
+            }
+            try
+            {
+                httpWebRequest.GetResponse();
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual<string>(e.Message, "The remote server returned an error: (400) Bad Request.");
+            }
         }
     }
 }

@@ -50,13 +50,13 @@
             }
         }
 
-        public string HttpPrefix
+        public string HttpListenerPrefix
         {
             get
             {
                 try
                 {
-                    return this.configuration.Element("HttpPrefix").Value;
+                    return this.configuration.Element("WebServer")?.Element("HttpListenerPrefix")?.Value;
                 }
                 catch (Exception e)
                 {

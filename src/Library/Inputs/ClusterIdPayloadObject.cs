@@ -1,9 +1,9 @@
 ﻿namespace Microsoft.IstioMixerPlugin.Library.Inputs
 {
     using System;
-    public class JsonPayloadObject
+    public class ClusterIdPayloadObject
     {
-        public  Guid clusterId = Guid.Empty;
+        public  string clusterId = string.Empty;
 
         public override string ToString()
         {
