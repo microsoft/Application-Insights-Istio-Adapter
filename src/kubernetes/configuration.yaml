@@ -23,9 +23,9 @@ spec:
    destination.name: destination.name | ""
    destination.workload.name: destination.workload.name | ""
    destination.workload.namespace: destination.workload.namespace | ""
-   source.role.name: source.labels["app"] | source.uid | ""
+   source.role.name: conditional(((source.labels["app"] | "#") != "#") && ((source.labels["version"] | "#") != "#"), source.labels["app"] + "." + source.labels["version"], source.labels["app"] | source.uid | "")
    source.role.instance: source.uid | ""
-   destination.role.name: destination.labels["app"] | destination.uid | ""
+   destination.role.name: conditional(((destination.labels["app"] | "#") != "#") && ((destination.labels["version"] | "#") != "#"), destination.labels["app"] + "." + destination.labels["version"], destination.labels["app"] | destination.uid | "")
    destination.role.instance: destination.uid | ""
    context.reporter.kind: context.reporter.kind | "inbound"
    context.reporter.uid: context.reporter.uid | ""

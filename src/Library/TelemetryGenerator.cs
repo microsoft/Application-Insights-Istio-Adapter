@@ -159,7 +159,7 @@ namespace Microsoft.IstioMixerPlugin.Library
 
             if (!isInstanceInteresting || !contextProtocol.StartsWith("http") /*|| (contextProtocol == "tcp" && connectionEvent != "open")*/)
             {
-                Diagnostics.LogTrace("SKIPPED");
+                Diagnostics.LogTrace($"SKIPPED: isInstanceInteresting: {isInstanceInteresting}, contextProtocol: {contextProtocol}");
 
                 yield break;
             }
@@ -599,24 +599,6 @@ namespace Microsoft.IstioMixerPlugin.Library
             catch (Exception e)
             {
                 throw new FormatException($"url: {url}", e);
-            }
-        }
-
-        private static byte[] HexStringToBytes(string hex)
-        {
-            try
-            {
-                int numberChars = hex.Length;
-                byte[] bytes = new byte[numberChars / 2];
-                for (int i = 0; i < numberChars; i += 2)
-                    bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-
-                return bytes;
-            }
-            catch (Exception)
-            {
-                // something went wrong, probably not a well formated hex byte string
-                return new byte[0];
             }
         }
 

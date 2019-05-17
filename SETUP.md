@@ -72,26 +72,27 @@ there will be no telemetry either.
 2. Ensure the correct instrumentation key is provided in *ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY* environment variable in *application-insights-istio-mixer-adapter-deployment.yaml*. The instrumentation key
 is found on the *Overview* blade of the Application Insights resource in Azure Portal.
 3. Ensure the correct Kubernetes namespace is provided in *ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES* environment variable in *application-insights-istio-mixer-adapter-deployment.yaml*. Leave it blank to monitor all namespaces.
-4. Ensure your application's pods have been sidecar-injected by Istio. Verify that Istio's sidecar exists on each pod.
+4. Ensure your application complies with Istio requirements listed [here](https://istio.io/docs/setup/kubernetes/prepare/requirements/).
+5. Ensure your application's pods have been sidecar-injected by Istio. Verify that Istio's sidecar exists on each pod.
    ```
    kubectl describe pod -n <my-app-namespace> <my-app-pod-name>
    ```
    Verify that there is a container named *istio-proxy* running on the pod.
 
-5. View *Application Insights for Kubernetes* adapter's traces.
+6. View *Application Insights for Kubernetes* adapter's traces.
    ```
    kubectl get pods -n istio-system -l "app=application-insights-istio-mixer-adapter"
    kubectl logs -n istio-system application-insights-istio-mixer-adapter-<fill in from previous command output>
    ```
    The count of received telemetry items is updated once a minute. If it doesn't grow minute over minute - no telemetry is being sent to the adapter by Istio.
    Look for any errors in the log.
-6. If it has been established that *Application Insights for Kubernetes* adapter is not being fed telemetry, check Istio's Mixer logs to figure out why it's not sending data to the adapter:
+7. If it has been established that *Application Insights for Kubernetes* adapter is not being fed telemetry, check Istio's Mixer logs to figure out why it's not sending data to the adapter:
    ```
    kubectl get pods -n istio-system -l "istio=mixer,app=telemetry"
    kubectl logs -n istio-system istio-telemetry-<fill in from previous command output> -c mixer
    ```
    Look for any errors, especially pertaining to communications with *applicationinsightsadapter* adapter.
-7. To learn more about how Istio functions, please see documentation [here](https://istio.io/docs/concepts/what-is-istio/).
+8. To learn more about how Istio functions, please see documentation [here](https://istio.io/docs/concepts/what-is-istio/).
 
 ## FAQ
 - *Are other service meshes supported?* We have supported Istio as our first service mesh; we are currently looking at others (Linkerd, Consul) and expect to expand support soon.
