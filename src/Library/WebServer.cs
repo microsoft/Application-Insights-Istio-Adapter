@@ -52,7 +52,6 @@
 
             lock (this.syncObject)
             {
-
                 try
                 {
                     this.listener.Start();

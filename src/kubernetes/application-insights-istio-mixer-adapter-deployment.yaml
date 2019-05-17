@@ -23,7 +23,7 @@ spec:
           containerPort: 6789
         env:
         - name: ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY
-          value: "62803692-9b68-45ca-8694-b94964e2c840" # instrumentation key for the Application Insights resource to send telemetry to
+          value: "00000000-0000-0000-0000-000000000000" # instrumentation key for the Application Insights resource to send telemetry to
         - name: ISTIO_MIXER_PLUGIN_AI_LIVE_METRICS_STREAM_AUTH_KEY
           value: ""
         - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES
