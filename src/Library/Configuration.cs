@@ -50,6 +50,22 @@
             }
         }
 
+        public string HttpListenerPrefix
+        {
+            get
+            {
+                try
+                {
+                    return this.configuration.Element("WebServer")?.Element("HttpListenerPrefix")?.Value;
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException(
+                        FormattableString.Invariant($"Could not find or convert the data field {MethodBase.GetCurrentMethod().Name} in configuration. {this.configuration.Value}"), e);
+                }
+            }
+        }
+
         public string InstrumentationKey
         {
             get

@@ -4,7 +4,6 @@
     using System.IO;
     using System.Threading;
     using Library;
-
     class Program
     {
         static void Main(string[] args)
@@ -27,7 +26,7 @@
             {
                 Common.Diagnostics.LogInfo("Starting the host...");
 
-                string config = ReadConfiguratiion();
+                string config = ReadConfiguration();
 
                 host.Run(config, TimeSpan.FromSeconds(5));
 
@@ -77,7 +76,7 @@
             Common.Diagnostics.LogInfo("The console host has exited");
         }
 
-        private static string ReadConfiguratiion()
+        private static string ReadConfiguration()
         {
             try
             {
