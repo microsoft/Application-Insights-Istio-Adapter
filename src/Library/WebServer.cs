@@ -10,12 +10,12 @@
     {
         private HttpListener listener;
         private readonly Configuration config;
-        private readonly Object syncObject = new Object();
+
         internal bool IsRunning
         {
             get
             {
-                return this.listener != null ? this.listener.IsListening : false;
+                return this.listener?.IsListening ?? false;
             }
         }
 
@@ -73,7 +73,7 @@
 
             try
             {
-                this.listener.Close();
+               this.listener.Close();
             }
             catch (Exception e)
             {
@@ -114,7 +114,7 @@
                         Diagnostics.LogInfo(FormattableString.Invariant($"received payload with cluster id : {payloadObject.clusterId}"));
                         response.StatusCode = (int)HttpStatusCode.Accepted;
                     }
-                    
+
                 }
                 catch (Exception e)
                 {
@@ -128,6 +128,10 @@
 
                 this.listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
                 Diagnostics.LogInfo("Restarting listening");
+            }
+            else
+            {
+                this.listener.EndGetContext(result);
             }
         }
     }

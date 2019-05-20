@@ -3,7 +3,7 @@
     using System;
     public class ClusterIdPayloadObject
     {
-        public  string clusterId = string.Empty;
+        public string clusterId = string.Empty;
 
         public override string ToString()
         {

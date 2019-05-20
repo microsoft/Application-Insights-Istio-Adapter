@@ -31,9 +31,6 @@
                 host.Run(config, TimeSpan.FromSeconds(5));
 
                 Common.Diagnostics.LogInfo("The host is running");
-                
-              //  WebServer ws = new WebServer(config);
-                //ws.Start();
             }
             catch (Exception e)
             {
