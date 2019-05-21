@@ -129,10 +129,6 @@
                 this.listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
                 Diagnostics.LogInfo("Restarting listening");
             }
-            else
-            {
-                this.listener.EndGetContext(result);
-            }
         }
     }
 }
