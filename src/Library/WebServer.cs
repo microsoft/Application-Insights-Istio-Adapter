@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.IstioMixerPlugin.Library
 {
+    using Microsoft.ApplicationInsights;
     using Microsoft.IstioMixerPlugin.Common;
     using Microsoft.IstioMixerPlugin.Library.Inputs;
     using System;
@@ -10,6 +11,7 @@
     {
         private HttpListener listener;
         private readonly Configuration config;
+        private EventPublisher publisher;
 
         internal bool IsRunning
         {
@@ -19,7 +21,7 @@
             }
         }
 
-        public WebServer(string config)
+        public WebServer(string config, TelemetryClient telemetryClient)
         {
             if (!HttpListener.IsSupported)
             {
@@ -35,7 +37,15 @@
                 throw new ArgumentException(logLine);
             }
 
+            if (telemetryClient == null)
+            {
+                string logLine = FormattableString.Invariant($"telemetry client missing");
+                Diagnostics.LogError(logLine);
+                throw new ArgumentException(logLine);
+            }
+
             this.config = new Configuration(config);
+            this.publisher = new EventPublisher(telemetryClient);
         }
 
         public void Start()
@@ -113,6 +123,8 @@
                         ClusterIdPayloadObject payloadObject = (ClusterIdPayloadObject)serializer.ReadObject(request.InputStream);
                         Diagnostics.LogInfo(FormattableString.Invariant($"received payload with cluster id : {payloadObject.clusterId}"));
                         response.StatusCode = (int)HttpStatusCode.Accepted;
+
+                        this.publisher.UpdateClusterId(payloadObject.clusterId);
                     }
 
                 }
@@ -128,10 +140,6 @@
 
                 this.listener.BeginGetContext(new AsyncCallback(this.ListenerCallbackAsync), this.listener);
                 Diagnostics.LogInfo("Restarting listening");
-            }
-            else
-            {
-                this.listener.EndGetContext(result);
             }
         }
     }

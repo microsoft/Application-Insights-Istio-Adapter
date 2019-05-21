@@ -1,6 +1,7 @@
 ﻿namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -27,6 +28,8 @@
         private string config;
         private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
         private WebServer webServer;
+        ConcurrentQueue<ITelemetry> sentItems;
+
         [TestInitialize]
         public void Init()
         {
@@ -37,7 +40,9 @@
                             </WebServer>
                         </Configuration>
                         ";
-            webServer = new WebServer(config);
+            TelemetryClient telemetryClient = Common.SetupStubTelemetryClient(out sentItems);
+
+            webServer = new WebServer(config, telemetryClient);
             Assert.IsFalse(webServer.IsRunning);
         }
 
@@ -46,6 +51,8 @@
         {
             webServer.Stop();
             Assert.IsFalse(webServer.IsRunning);
+            sentItems.Clear();
+            sentItems = null;
         }
         [TestMethod]
         public void WebServerTests_InitialState()
@@ -90,6 +97,7 @@
             catch (Exception e)
             {
                 Assert.AreEqual<string>(e.Message, @"Response status code does not indicate success: 405 (Method Not Allowed).");
+                Common.AssertIsTrueEventually(() => sentItems.Count == 0);
             }
         }
 
@@ -104,14 +112,15 @@
                 RequestUri = new Uri("http://127.0.0.1:8888/test/"),
                 Method = HttpMethod.Post,
             };
-            
-            Dictionary<string,string> values = new Dictionary<string, string>{
+
+            Dictionary<string, string> values = new Dictionary<string, string>{
                                                            { "ana", "are" },
                                                            { "mere", "pere" }
                                                        };
             var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:8888/test/", content);
-                Assert.AreEqual<string>(response.ReasonPhrase, "Unsupported Media Type");
+            HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:8888/test/", content);
+            Assert.AreEqual<string>(response.ReasonPhrase, "Unsupported Media Type");
+            Common.AssertIsTrueEventually(() => sentItems.Count == 0);
         }
 
         [TestMethod]
@@ -135,6 +144,7 @@
 
             HttpWebResponse httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             Assert.AreEqual<HttpStatusCode>(httpResponse.StatusCode, HttpStatusCode.Accepted);
+            Common.AssertIsTrueEventually(() => sentItems.Count == 1);
         }
 
         [TestMethod]
@@ -163,6 +173,7 @@
             catch (Exception e)
             {
                 Assert.AreEqual<string>(e.Message, "The remote server returned an error: (400) Bad Request.");
+                Common.AssertIsTrueEventually(() => sentItems.Count == 0);
             }
         }
     }
