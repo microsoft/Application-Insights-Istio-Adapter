@@ -29,6 +29,7 @@
         {
             this.telemetryClient = telemetryClient;
         }
+
         /// <summary>
         /// Starts the library in a resilient mode.
         /// </summary>
@@ -41,6 +42,7 @@
             {
                 this.isRunning = true;
                 this.library = null;
+
                 while (true)
                 {
                     try
@@ -76,6 +78,7 @@
             lock(this.sync)
             {
                 Host.StopLibrary(this.library);
+
                 this.library = null;
                 this.isRunning = false;
             }
