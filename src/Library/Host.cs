@@ -29,7 +29,7 @@
         {
             this.telemetryClient = telemetryClient;
         }
-        
+
         /// <summary>
         /// Starts the library in a resilient mode.
         /// </summary>
@@ -42,7 +42,7 @@
             {
                 this.isRunning = true;
                 this.library = null;
-                
+
                 while (true)
                 {
                     try

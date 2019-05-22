@@ -1,86 +1,77 @@
 ﻿namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
 {
+    using IstioMixerPlugin.Library;
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-    using ApplicationInsights;
-    using ApplicationInsights.Channel;
-    using ApplicationInsights.DataContracts;
-    using ApplicationInsights.Extensibility.Implementation;
-    using Google.Protobuf;
-    using Google.Protobuf.WellKnownTypes;
-    using Istio.Policy.V1Beta1;
-    using IstioMixerPlugin.Library;
-    using Tracespan;
     using VisualStudio.TestTools.UnitTesting;
     using Uri = System.Uri;
 
     [TestClass]
-    public class WebServerTests
+    public class ClusterInfoListenerTests
     {
         private string config;
         private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
-        private WebServer webServer;
+        private ClusterInfoListener ciListener;
+
         [TestInitialize]
         public void Init()
         {
             config = $@"<?xml version=""1.0"" encoding=""utf-8"" ?>
                         <Configuration>
-                            <WebServer>
+                            <ClusterInfoListener>
                                 <HttpListenerPrefix>http://*:8888/test/</HttpListenerPrefix>
-                            </WebServer>
+                            </ClusterInfoListener>
                         </Configuration>
                         ";
-            webServer = new WebServer(config);
-            Assert.IsFalse(webServer.IsRunning);
+
+            ciListener = new ClusterInfoListener(config);
+            Assert.IsFalse(ciListener.IsRunning);
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            webServer.Stop();
-            Assert.IsFalse(webServer.IsRunning);
+            ciListener.Stop();
+            Assert.IsFalse(ciListener.IsRunning);
         }
         [TestMethod]
-        public void WebServerTests_InitialState()
+        public void ClusterInfoListenerTests_InitialState()
         {
-            Assert.IsFalse(webServer.IsRunning);
-        }
-
-        [TestMethod]
-        public void WebServerTests_StopBeforeStart()
-        {
-            Assert.IsFalse(webServer.IsRunning);
-        }
-
-
-        [TestMethod]
-        public void WebServerTests_Start()
-        {
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
+            Assert.IsFalse(ciListener.IsRunning);
         }
 
         [TestMethod]
-        public void WebServerTests_StartTwice()
+        public void ClusterInfoListenerTests_StopBeforeStart()
         {
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
+            Assert.IsFalse(ciListener.IsRunning);
+        }
+
+
+        [TestMethod]
+        public void ClusterInfoListenerTests_Start()
+        {
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
         }
 
         [TestMethod]
-        public async Task WebServerTests_Start_NonPostMethod()
+        public void ClusterInfoListenerTests_StartTwice()
         {
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
+        }
+
+        [TestMethod]
+        public async Task ClusterInfoListenerTestsTests_Start_NonPostMethod()
+        {
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
             HttpClient client = new HttpClient();
             try
             {
@@ -94,31 +85,31 @@
         }
 
         [TestMethod]
-        public async Task WebServerTests_Start_Post_NotJson()
+        public async Task ClusterInfoListenerTests_Start_Post_NotJson()
         {
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
             HttpClient client = new HttpClient();
             HttpRequestMessage request = new HttpRequestMessage()
             {
                 RequestUri = new Uri("http://127.0.0.1:8888/test/"),
                 Method = HttpMethod.Post,
             };
-            
-            Dictionary<string,string> values = new Dictionary<string, string>{
+
+            Dictionary<string, string> values = new Dictionary<string, string>{
                                                            { "ana", "are" },
                                                            { "mere", "pere" }
                                                        };
             var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:8888/test/", content);
-                Assert.AreEqual<string>(response.ReasonPhrase, "Unsupported Media Type");
+            HttpResponseMessage response = await client.PostAsync("http://127.0.0.1:8888/test/", content);
+            Assert.AreEqual<string>(response.ReasonPhrase, "Unsupported Media Type");
         }
 
         [TestMethod]
-        public void WebServerTests_Write_Valid_Json()
+        public void ClusterInfoListenerTests_Write_Valid_Json()
         {
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
 
             HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:8888/test/");
             httpWebRequest.ContentType = "application/json";
@@ -138,10 +129,10 @@
         }
 
         [TestMethod]
-        public void WebServerTests_Write_Invalid_Json()
+        public void ClusterInfoListenerTests_Write_Invalid_Json()
         {
-            webServer.Start();
-            Assert.IsTrue(webServer.IsRunning);
+            ciListener.Start();
+            Assert.IsTrue(ciListener.IsRunning);
 
             HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:8888/test/");
             httpWebRequest.ContentType = "application/json";

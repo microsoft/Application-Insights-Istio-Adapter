@@ -6,11 +6,11 @@
     using System.Net;
     using System.Runtime.Serialization.Json;
 
-    public class WebServer
+    public class ClusterInfoListener
     {
         private HttpListener listener;
         private readonly Configuration config;
-
+        
         internal bool IsRunning
         {
             get
@@ -19,7 +19,7 @@
             }
         }
 
-        public WebServer(string config)
+        public ClusterInfoListener(string config)
         {
             if (!HttpListener.IsSupported)
             {
@@ -42,7 +42,7 @@
         {
             if (this.IsRunning)
             {
-                Diagnostics.LogInfo("WebServer already running .. exiting");
+                Diagnostics.LogInfo("ClusterInfoListener already running .. exiting");
                 return;
             }
             // Create a listener.
@@ -60,14 +60,14 @@
                 throw e;
             }
 
-            Diagnostics.LogInfo(FormattableString.Invariant($"Webserver running"));
+            Diagnostics.LogInfo(FormattableString.Invariant($"ClusterInfoListener running"));
         }
 
         public void Stop()
         {
             if (!this.IsRunning)
             {
-                Diagnostics.LogInfo("WebServer already stopped .. exiting");
+                Diagnostics.LogInfo("ClusterInfoListener already stopped .. exiting");
                 return;
             }
 
@@ -80,7 +80,7 @@
                 Diagnostics.LogError(e.ToString());
                 throw e;
             }
-            Diagnostics.LogInfo("WebServer stopped from taking any new requests");
+            Diagnostics.LogInfo("ClusterInfoListener stopped from taking any new requests");
         }
 
         internal void ListenerCallbackAsync(IAsyncResult result)
@@ -112,6 +112,9 @@
                         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ClusterIdPayloadObject));
                         ClusterIdPayloadObject payloadObject = (ClusterIdPayloadObject)serializer.ReadObject(request.InputStream);
                         Diagnostics.LogInfo(FormattableString.Invariant($"received payload with cluster id : {payloadObject.clusterId}"));
+
+                        HeartbeatCustomizer heartbeat = new HeartbeatCustomizer();
+                        heartbeat.UpdateClusterId(payloadObject.clusterId);
                         response.StatusCode = (int)HttpStatusCode.Accepted;
                     }
 
