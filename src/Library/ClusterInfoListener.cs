@@ -6,7 +6,7 @@
     using System.Net;
     using System.Runtime.Serialization.Json;
 
-    public class WebServer
+    public class ClusterInfoListener
     {
         private HttpListener listener;
         private readonly Configuration config;
@@ -19,7 +19,7 @@
             }
         }
 
-        public WebServer(string config)
+        public ClusterInfoListener(string config)
         {
             if (!HttpListener.IsSupported)
             {
@@ -42,7 +42,7 @@
         {
             if (this.IsRunning)
             {
-                Diagnostics.LogInfo("WebServer already running .. exiting");
+                Diagnostics.LogInfo("ClusterInfoListener already running .. exiting");
                 return;
             }
             // Create a listener.
@@ -60,14 +60,14 @@
                 throw e;
             }
 
-            Diagnostics.LogInfo(FormattableString.Invariant($"Webserver running"));
+            Diagnostics.LogInfo(FormattableString.Invariant($"ClusterInfoListener running"));
         }
 
         public void Stop()
         {
             if (!this.IsRunning)
             {
-                Diagnostics.LogInfo("WebServer already stopped .. exiting");
+                Diagnostics.LogInfo("ClusterInfoListener already stopped .. exiting");
                 return;
             }
 
@@ -80,7 +80,7 @@
                 Diagnostics.LogError(e.ToString());
                 throw e;
             }
-            Diagnostics.LogInfo("WebServer stopped from taking any new requests");
+            Diagnostics.LogInfo("ClusterInfoListener stopped from taking any new requests");
         }
 
         internal void ListenerCallbackAsync(IAsyncResult result)

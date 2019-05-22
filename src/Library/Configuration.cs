@@ -56,7 +56,7 @@
             {
                 try
                 {
-                    return this.configuration.Element("WebServer")?.Element("HttpListenerPrefix")?.Value;
+                    return this.configuration.Element("ClusterInfoListener")?.Element("HttpListenerPrefix")?.Value;
                 }
                 catch (Exception e)
                 {
