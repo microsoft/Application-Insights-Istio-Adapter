@@ -1,48 +1,60 @@
 ﻿namespace Microsoft.IstioMixerPlugin.Library
 {
-    using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Extensibility.Implementation;
+    using Microsoft.ApplicationInsights.Extensibility.Implementation.Tracing;
     using Microsoft.IstioMixerPlugin.Common;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+
     internal class EventPublisher
     {
-        private TelemetryClient telemetryClient;
-        public EventPublisher(TelemetryClient telemetryClient)
+        private IHeartbeatPropertyManager heartbeatModule;
+        private bool firstTime = true;
+        public EventPublisher()
         {
-            this.telemetryClient = telemetryClient ?? throw new ArgumentNullException("telemetryClient");
+            var telemetryModules = TelemetryModules.Instance;
+            this.heartbeatModule = telemetryModules.Modules.OfType<IHeartbeatPropertyManager>().FirstOrDefault();
             Diagnostics.LogInfo("EventPubliesher initialized");
         }
 
-        public void UpdateClusterId(string clusterId)
+        public bool UpdateClusterId(string clusterId)
         {
+            bool sent = false;
+            // we don't want to throw here, just log. thus in case of evel message we don't explode
             try
             {
-                Dictionary<string, string> properties = AddToDictionary("cluesterId", clusterId);
-                this.telemetryClient.TrackEvent("CluesterId", properties);
-                Diagnostics.LogInfo(FormattableString.Invariant($"sent update with cluesterid: {clusterId}"));
+                if (String.IsNullOrEmpty(clusterId))
+                {
+                    throw new ArgumentNullException("clusterId");
+                }
+
+                if (heartbeatModule != null)
+                {
+                    if (firstTime)
+                    {
+                        heartbeatModule.AddHeartbeatProperty("clusterID", clusterId, true);
+                        firstTime = false;
+                    }
+                    else
+                    {
+                        heartbeatModule.SetHeartbeatProperty("clusterID", clusterId);
+                    }
+                    Diagnostics.LogInfo(FormattableString.Invariant($"sent update with cluesterid: {clusterId}"));
+                    sent = true;
+                }
+                else
+                {
+                    Diagnostics.LogInfo(FormattableString.Invariant($"unable to send clusterId, no telemetry module detected"));
+                }
             }
             catch (Exception e)
             {
                 // unexpected exception occured
                 Diagnostics.LogError(FormattableString.Invariant($"Unknown exception while pushing event . {e.ToString()}"));
             }
-        }
-
-        private Dictionary<string, T> AddToDictionary<T>(string key, T value, Dictionary<string, T> input = null)
-        {
-            if (String.IsNullOrEmpty(key))
-            {
-                throw new ArgumentNullException("key");
-            }
-
-            if (value == null)
-            {
-                throw new ArgumentNullException("value");
-            }
-
-            Dictionary<string, T> output = input ?? new Dictionary<string, T>();
-            output[key] = value;
-            return output;
+            return sent;
         }
     }
 }

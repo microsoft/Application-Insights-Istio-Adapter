@@ -21,7 +21,7 @@
             }
         }
 
-        public WebServer(string config, TelemetryClient telemetryClient)
+        public WebServer(string config)
         {
             if (!HttpListener.IsSupported)
             {
@@ -37,15 +37,8 @@
                 throw new ArgumentException(logLine);
             }
 
-            if (telemetryClient == null)
-            {
-                string logLine = FormattableString.Invariant($"telemetry client missing");
-                Diagnostics.LogError(logLine);
-                throw new ArgumentException(logLine);
-            }
-
             this.config = new Configuration(config);
-            this.publisher = new EventPublisher(telemetryClient);
+            this.publisher = new EventPublisher();
         }
 
         public void Start()
