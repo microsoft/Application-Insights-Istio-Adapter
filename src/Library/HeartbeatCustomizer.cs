@@ -11,7 +11,6 @@
     internal class HeartbeatCustomizer
     {
         private IHeartbeatPropertyManager heartbeatModule;
-        private bool firstTimeUpdate = true;
         public HeartbeatCustomizer()
         {
             var telemetryModules = TelemetryModules.Instance;
@@ -32,15 +31,16 @@
 
                 if (heartbeatModule != null)
                 {
-                    if (firstTimeUpdate)
+                    try
                     {
                         heartbeatModule.AddHeartbeatProperty("clusterID", clusterId, true);
-                        firstTimeUpdate = false;
                     }
-                    else
+                    catch (Exception)
                     {
+                        // we already added it before , thus updating the value of the field
                         heartbeatModule.SetHeartbeatProperty("clusterID", clusterId);
                     }
+
                     Diagnostics.LogInfo(FormattableString.Invariant($"sent update with cluesterid: {clusterId}"));
                     sent = true;
                 }

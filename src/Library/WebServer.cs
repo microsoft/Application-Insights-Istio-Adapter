@@ -10,8 +10,7 @@
     {
         private HttpListener listener;
         private readonly Configuration config;
-        private HeartbeatCustomizer publisher;
-
+        
         internal bool IsRunning
         {
             get
@@ -37,7 +36,6 @@
             }
 
             this.config = new Configuration(config);
-            this.publisher = new HeartbeatCustomizer();
         }
 
         public void Start()
@@ -114,9 +112,10 @@
                         DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ClusterIdPayloadObject));
                         ClusterIdPayloadObject payloadObject = (ClusterIdPayloadObject)serializer.ReadObject(request.InputStream);
                         Diagnostics.LogInfo(FormattableString.Invariant($"received payload with cluster id : {payloadObject.clusterId}"));
-                        this.publisher.UpdateClusterId(payloadObject.clusterId);
-                        response.StatusCode = (int)HttpStatusCode.Accepted;
 
+                        HeartbeatCustomizer heartbeat = new HeartbeatCustomizer();
+                        heartbeat.UpdateClusterId(payloadObject.clusterId);
+                        response.StatusCode = (int)HttpStatusCode.Accepted;
                     }
 
                 }
