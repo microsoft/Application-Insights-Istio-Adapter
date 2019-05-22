@@ -29,7 +29,6 @@
         {
             this.telemetryClient = telemetryClient;
         }
-
         /// <summary>
         /// Starts the library in a resilient mode.
         /// </summary>
@@ -42,7 +41,6 @@
             {
                 this.isRunning = true;
                 this.library = null;
-
                 while (true)
                 {
                     try
@@ -75,7 +73,7 @@
         /// </summary>
         public void Stop()
         {
-            lock (this.sync)
+            lock(this.sync)
             {
                 Host.StopLibrary(this.library);
                 this.library = null;
@@ -106,7 +104,7 @@
 
         private static void StopLibrary(Library library)
         {
-            if (library == null)
+            if(library == null)
             {
                 throw new InvalidOperationException(FormattableString.Invariant($"The library is not running yet, try stopping it again in a few moments"));
             }
