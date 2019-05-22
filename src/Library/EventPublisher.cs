@@ -8,21 +8,21 @@
     using System.Linq;
     using System.Threading;
 
-    internal class EventPublisher
+    internal class HeartbeatCustomizer
     {
         private IHeartbeatPropertyManager heartbeatModule;
-        private bool firstTime = true;
-        public EventPublisher()
+        private bool firstTimeUpdate = true;
+        public HeartbeatCustomizer()
         {
             var telemetryModules = TelemetryModules.Instance;
             this.heartbeatModule = telemetryModules.Modules.OfType<IHeartbeatPropertyManager>().FirstOrDefault();
-            Diagnostics.LogInfo("EventPubliesher initialized");
+            Diagnostics.LogInfo("HeartbeatCustomizer initialized");
         }
 
         public bool UpdateClusterId(string clusterId)
         {
             bool sent = false;
-            // we don't want to throw here, just log. thus in case of evel message we don't explode
+            // we don't want to throw here, just log. thus in case of empty cluster id in the message message we don't want to throw, but we will log it
             try
             {
                 if (String.IsNullOrEmpty(clusterId))
@@ -32,10 +32,10 @@
 
                 if (heartbeatModule != null)
                 {
-                    if (firstTime)
+                    if (firstTimeUpdate)
                     {
                         heartbeatModule.AddHeartbeatProperty("clusterID", clusterId, true);
-                        firstTime = false;
+                        firstTimeUpdate = false;
                     }
                     else
                     {

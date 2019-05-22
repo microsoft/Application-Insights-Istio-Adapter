@@ -12,9 +12,9 @@
     using System.Text;
 
     [TestClass]
-    public class EventPublisterTests
+    public class HeartbeatCustomizerTests
     {
-        private EventPublisher publisher;
+        private HeartbeatCustomizer publisher;
         ConcurrentQueue<ITelemetry> sentItems;
 
         [TestInitialize]
@@ -22,19 +22,17 @@
         {
             DiagnosticsTelemetryModule dm = new DiagnosticsTelemetryModule();
             TelemetryModules.Instance.Modules.Add(dm);
-            publisher = new EventPublisher();
+            publisher = new HeartbeatCustomizer();
         }
 
-     
-
         [TestMethod]
-        public void EventPublisterTests_SendOneItem()
+        public void HeartbeatCustomizerTests_SendOneItem()
         {
            Assert.IsTrue(publisher.UpdateClusterId("123abc"));
         }
 
         [TestMethod]
-        public void EventPublisterTests_SendMultipleItems()
+        public void HeartbeatCustomizerTests_SendMultipleItems()
         {
             for (int i = 0; i < 10; i++)
             {
@@ -43,17 +41,17 @@
         }
 
         [TestMethod]
-        public void EventPublisterTests_SendOneEmptyItem()
+        public void HeartbeatCustomizerTests_SendOneEmptyItem()
         {
             Assert.IsFalse(publisher.UpdateClusterId(null));
             Assert.IsTrue(publisher.UpdateClusterId("123abc"));
         }
 
         [TestMethod]
-        public void EventPublisterTests_NoModule()
+        public void HeartbeatCustomizerTests_NoModule()
         {
             TelemetryModules.Instance.Modules.Clear();
-            publisher = new EventPublisher();
+            publisher = new HeartbeatCustomizer();
             Assert.IsFalse(publisher.UpdateClusterId("123abc"));
         }
     }
