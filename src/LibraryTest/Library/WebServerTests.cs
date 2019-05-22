@@ -1,24 +1,12 @@
 ﻿namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
 {
+    using IstioMixerPlugin.Library;
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Http.Headers;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-    using ApplicationInsights;
-    using ApplicationInsights.Channel;
-    using ApplicationInsights.DataContracts;
-    using ApplicationInsights.Extensibility.Implementation;
-    using Google.Protobuf;
-    using Google.Protobuf.WellKnownTypes;
-    using Istio.Policy.V1Beta1;
-    using IstioMixerPlugin.Library;
-    using Tracespan;
     using VisualStudio.TestTools.UnitTesting;
     using Uri = System.Uri;
 
@@ -28,7 +16,6 @@
         private string config;
         private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
         private WebServer webServer;
-        
 
         [TestInitialize]
         public void Init()

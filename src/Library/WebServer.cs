@@ -1,6 +1,5 @@
 ﻿namespace Microsoft.IstioMixerPlugin.Library
 {
-    using Microsoft.ApplicationInsights;
     using Microsoft.IstioMixerPlugin.Common;
     using Microsoft.IstioMixerPlugin.Library.Inputs;
     using System;
