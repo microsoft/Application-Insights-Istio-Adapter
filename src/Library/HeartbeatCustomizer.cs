@@ -18,6 +18,7 @@
             Diagnostics.LogInfo("HeartbeatCustomizer initialized");
         }
 
+        // this is not thread safe. ATM it is called from the same thread as the webserver so it should be fine
         public bool UpdateClusterId(string clusterId)
         {
             bool sent = false;

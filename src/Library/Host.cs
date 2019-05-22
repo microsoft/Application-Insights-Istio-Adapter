@@ -14,8 +14,6 @@
 
         private Library library;
 
-        private ClusterInfoListener ciLestener;
-
         private bool isRunning;
 
         private readonly TelemetryClient telemetryClient = null;
@@ -31,7 +29,7 @@
         {
             this.telemetryClient = telemetryClient;
         }
-        
+
         /// <summary>
         /// Starts the library in a resilient mode.
         /// </summary>
@@ -44,7 +42,6 @@
             {
                 this.isRunning = true;
                 this.library = null;
-                this.ciLestener = null;
 
                 while (true)
                 {
@@ -59,11 +56,6 @@
                                 {
                                     this.library = Host.StartNewLibrary(configuration, this.telemetryClient);
                                     this.isRunning = true;
-                                }
-
-                                if (this.ciLestener?.IsRunning != true)
-                                {
-                                    this.ciLestener = Host.StartNewWebServer(configuration);
                                 }
                             }
                         }
@@ -83,12 +75,10 @@
         /// </summary>
         public void Stop()
         {
-            lock(this.sync)
+            lock (this.sync)
             {
                 Host.StopLibrary(this.library);
-                Host.StopWebServer(this.ciLestener);
                 this.library = null;
-                this.ciLestener = null;
                 this.isRunning = false;
             }
         }
@@ -114,31 +104,9 @@
             }
         }
 
-        private static ClusterInfoListener StartNewWebServer(string configuration)
-        {
-            try
-            {
-                Common.Diagnostics.LogInfo("Starting the clusterInfoListener...");
-
-                ClusterInfoListener webServer = new ClusterInfoListener(configuration);
-
-                webServer.Start();
-
-                Common.Diagnostics.LogInfo("The clusterInfoListener is running");
-
-                return webServer;
-            }
-            catch (Exception e)
-            {
-                Common.Diagnostics.LogError(FormattableString.Invariant($"Unexpected error at start-up of the clusterInfoListener. {e.ToString()}"));
-                throw;
-            }
-        }
-
-
         private static void StopLibrary(Library library)
         {
-            if(library == null)
+            if (library == null)
             {
                 throw new InvalidOperationException(FormattableString.Invariant($"The library is not running yet, try stopping it again in a few moments"));
             }
@@ -153,25 +121,6 @@
             {
                 // swallow
                 Common.Diagnostics.LogError(FormattableString.Invariant($"Unexpected error while stopping the library. {e.ToString()}"));
-            }
-        }
-
-        private static void StopWebServer(ClusterInfoListener ciListener)
-        {
-            if (ciListener == null)
-            {
-                throw new InvalidOperationException(FormattableString.Invariant($"The clusterInfoListener is not running yet, try stopping it again in a few moments"));
-            }
-
-            try
-            {
-                ciListener.Stop();
-                Common.Diagnostics.LogInfo("The clusterInfoListener is stopped");
-            }
-            catch (Exception e)
-            {
-                // swallow
-                Common.Diagnostics.LogError(FormattableString.Invariant($"Unexpected error while stopping the clusterInfoListener. {e.ToString()}"));
             }
         }
     }
