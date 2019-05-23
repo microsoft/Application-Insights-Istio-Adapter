@@ -7,7 +7,6 @@
     using Microsoft.ApplicationInsights.Extensibility.PerfCounterCollector.QuickPulse;
 
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Exception = System.Exception;
     using Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel;
@@ -196,8 +195,8 @@
             }
             catch (System.Exception e)
             {
-                // unexpected exception occured
-                Diagnostics.LogError(FormattableString.Invariant($"Unknown exception while processing an instance. {e.ToString()}"));
+                // unexpected exception occured, let the caller handle it
+                throw;
             }
         }
 

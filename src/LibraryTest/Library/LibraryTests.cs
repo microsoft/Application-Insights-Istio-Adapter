@@ -407,8 +407,8 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
 
             string logs = await File.ReadAllTextAsync(logFileName).ConfigureAwait(false);
 
-            Assert.IsTrue(logs.Contains("|INFO|Istio's Mixer input: [ConnectionCount: 0, RequestsReceived: 0, InstancesReceived: 0, InstancesFailed: 0]"));
-            Assert.IsTrue(logs.Contains("|INFO|Istio's Mixer input: [ConnectionCount: 0, RequestsReceived: 2, InstancesReceived: 4, InstancesFailed: 0]"));
+            Assert.IsTrue(logs.Contains("|INFO|Istio's Mixer input: [ConnectionCount: 0, RequestsReceived: 0, InstancesSucceeded: 0, InstancesFailed: 0]"));
+            Assert.IsTrue(logs.Contains("|INFO|Istio's Mixer input: [ConnectionCount: 0, RequestsReceived: 2, InstancesSucceeded: 4, InstancesFailed: 0]"));
         }
     }
 }

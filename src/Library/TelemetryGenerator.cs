@@ -191,136 +191,138 @@ namespace Microsoft.IstioMixerPlugin.Library
                                         isSourceWithinTargetArea && !isDestinationWithinTargetArea && string.Equals(contextReporterKind, "outbound", StringComparison.InvariantCultureIgnoreCase) ||
                                         !isSourceWithinTargetArea && isDestinationWithinTargetArea && string.Equals(contextReporterKind, "inbound", StringComparison.InvariantCultureIgnoreCase);
 
-            if (instanceIsActionable)
+            if (!instanceIsActionable)
             {
-                var debugData = new Dictionary<string, string>()
-                {
-                    {"k8s.context.reporter.kind", contextReporterKind},
-                    {"k8s.context.reporter.uid", contextReporterUid},
+                Diagnostics.LogTrace($"NOT ACTIONABLE: isInstanceFullyWithinTargetArea: {isInstanceFullyWithinTargetArea}, contextReporterKind: {contextReporterKind}, isSourceWithinTargetArea: {isSourceWithinTargetArea}, isDestinationWithinTargetArea: {isDestinationWithinTargetArea}");
+                yield break;
+            }
+            var debugData = new Dictionary<string, string>()
+            {
+                {"k8s.context.reporter.kind", contextReporterKind},
+                {"k8s.context.reporter.uid", contextReporterUid},
 
-                    {"k8s.source.uid", sourceUid},
-                    {"k8s.source.name", sourceName},
-                    {"k8s.source.workload.name", sourceWorkloadName},
-                    {"k8s.source.workload.namespace", sourceWorkloadNamespace},
+                {"k8s.source.uid", sourceUid},
+                {"k8s.source.name", sourceName},
+                {"k8s.source.workload.name", sourceWorkloadName},
+                {"k8s.source.workload.namespace", sourceWorkloadNamespace},
 
-                    {"k8s.destination.uid", destinationUid},
-                    {"k8s.destination.name", destinationName},
-                    {"k8s.destination.workload.name", destinationWorkloadName},
-                    {"k8s.destination.workload.namespace", destinationWorkloadNamespace},
+                {"k8s.destination.uid", destinationUid},
+                {"k8s.destination.name", destinationName},
+                {"k8s.destination.workload.name", destinationWorkloadName},
+                {"k8s.destination.workload.namespace", destinationWorkloadNamespace},
 
-                    {"k8s.destination.service.uid", destinatonServiceUid},
-                    {"k8s.destination.service.host", destinatonServiceHost},
-                    {"k8s.destination.service.name", destinatonServiceName},
-                    {"k8s.destination.service.namespace", destinatonServiceNamespace},
+                {"k8s.destination.service.uid", destinatonServiceUid},
+                {"k8s.destination.service.host", destinatonServiceHost},
+                {"k8s.destination.service.name", destinatonServiceName},
+                {"k8s.destination.service.namespace", destinatonServiceNamespace},
 
 #if DEBUG_INFO
                     {"aks.debug.info", debugInfo}
 #endif
-                };
+            };
 
-                DateTimeOffset? startTime = instance.StartTime?.Value?.ToDateTimeOffset();
-                DateTimeOffset? endTime = instance.EndTime?.Value?.ToDateTimeOffset();
+            DateTimeOffset? startTime = instance.StartTime?.Value?.ToDateTimeOffset();
+            DateTimeOffset? endTime = instance.EndTime?.Value?.ToDateTimeOffset();
 
-                string latestRequestId = incomingRequestId;
+            string latestRequestId = incomingRequestId;
 
-                var log = new StringBuilder();
+            var log = new StringBuilder();
 
-                // if the source is an Istio Ingress Gateway we want to generate an additional pair of dependency/request on its behalf
-                // as if it's within our target area (we want to see it on the App Map)
-                if (isSourceIstioIngressGateway)
-                {
-                    log.Append(" RD(G) ");
+            // if the source is an Istio Ingress Gateway we want to generate an additional pair of dependency/request on its behalf
+            // as if it's within our target area (we want to see it on the App Map)
+            if (isSourceIstioIngressGateway)
+            {
+                log.Append(" RD(G) ");
 
-                    // we are generating a request/dependency pair for the Istio Ingress Gateway
-                    // the instance represents the call: gateway -> pod (reported by inbound proxy of the pod)
+                // we are generating a request/dependency pair for the Istio Ingress Gateway
+                // the instance represents the call: gateway -> pod (reported by inbound proxy of the pod)
 
-                    // on behalf of the gateway, report server span (request)
-                    // the request will represent the gateway's side of the call: internet -> gateway
-                    string gatewayRequestId = incomingRequestIdPresent ? AcknowledgeRequest(incomingRequestId) : incomingRequestId;
-                    yield return this.GenerateRequest(spanName: destinationRoleInstance,
-                        requestId: gatewayRequestId,
-                        parentRequestId: incomingRequestIdPresent ? incomingRequestId : string.Empty,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
-                        roleName: sourceRoleName, 
-                        roleInstance: sourceRoleInstance, 
-                        httpUrl: url, httpHost: host,
-                        httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
-                        httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
-                        requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: true, debugData: debugData);
+                // on behalf of the gateway, report server span (request)
+                // the request will represent the gateway's side of the call: internet -> gateway
+                string gatewayRequestId = incomingRequestIdPresent ? AcknowledgeRequest(incomingRequestId) : incomingRequestId;
+                yield return this.GenerateRequest(spanName: destinationRoleInstance,
+                    requestId: gatewayRequestId,
+                    parentRequestId: incomingRequestIdPresent ? incomingRequestId : string.Empty,
+                    spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
+                    roleName: sourceRoleName, 
+                    roleInstance: sourceRoleInstance, 
+                    httpUrl: url, httpHost: host,
+                    httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
+                    httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
+                    requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: true, debugData: debugData);
                     
-                    // on behalf of the Gateway, report client span (dependency call)
-                    // the dependency will represent the gateway's side of the call: gateway -> pod
-                    string requestId = StartDependency(gatewayRequestId);
-                    yield return this.GenerateDependency(spanName: destinationRoleInstance, 
-                        requestId: requestId,
-                        parentRequestId: gatewayRequestId,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime,
-                        endTime: endTime,
-                        roleName: sourceRoleName,
-                        roleInstance: sourceRoleInstance,
-                        httpUrl: url,
-                        httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
-                        protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
-                        debugData: debugData);
+                // on behalf of the Gateway, report client span (dependency call)
+                // the dependency will represent the gateway's side of the call: gateway -> pod
+                string requestId = StartDependency(gatewayRequestId);
+                yield return this.GenerateDependency(spanName: destinationRoleInstance, 
+                    requestId: requestId,
+                    parentRequestId: gatewayRequestId,
+                    spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime,
+                    endTime: endTime,
+                    roleName: sourceRoleName,
+                    roleInstance: sourceRoleInstance,
+                    httpUrl: url,
+                    httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
+                    protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
+                    debugData: debugData);
                     
-                    // advance latestRequestId so that the main dependency/request pair is stiched to the ingress gateway pair we've already created
-                    latestRequestId = requestId;
-                }
-
-                // now, let's generate the regular pair of dependency/request
-
-                // first, on behalf of the source, report client span (dependency call)
-                bool isIngressRequest = !isSourceWithinTargetArea && isDestinationWithinTargetArea;
-                if (!isIngressRequest)
-                {
-                    log.Append(" D ");
-
-                    string requestId = StartDependency(latestRequestId);
-
-                    //!!! Temporary support of app propagating Request-Id
-                    bool isEgressRequest = isSourceWithinTargetArea && !isDestinationWithinTargetArea;
-                    if (isEgressRequest && incomingRequestIdPresent)
-                    {
-                        requestId = incomingRequestId;
-                    }
-                    /////////// end of temporary support
-                    
-                    yield return this.GenerateDependency(spanName: destinationRoleInstance, 
-                        requestId: requestId,
-                        parentRequestId: latestRequestId,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime, 
-                        roleName: sourceRoleName, 
-                        roleInstance: sourceRoleInstance, 
-                        httpUrl: url,
-                        httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
-                        protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
-                        debugData: debugData);
-                    
-                    // advance latestRequestId
-                    latestRequestId = requestId;
-                }
-
-                // now, on behalf of the destination, report server span (request), but only if the destination is within the target area
-                // otherwise it's an external dependency and we don't want to generate requests for it
-                if (isDestinationWithinTargetArea)
-                {
-                    log.Append(" R ");
-                    // we only want to propagate synthetic context if this is a direct call from a synthetic probe (not through a gateway)
-                    // if it's a synthetic call through a gateway, the gateway will be the one for which we've propagated synthetic context above
-                    yield return this.GenerateRequest(spanName: destinationRoleInstance, 
-                        requestId: AcknowledgeRequest(latestRequestId),
-                        parentRequestId: latestRequestId,
-                        spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
-                        roleName: destinationRoleName, 
-                        roleInstance: destinationRoleInstance, 
-                        httpUrl: url, httpHost: host,
-                        httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
-                        httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
-                        requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: !isSourceIstioIngressGateway, debugData: debugData);
-                }
-
-                Diagnostics.LogTrace(log.ToString());
+                // advance latestRequestId so that the main dependency/request pair is stiched to the ingress gateway pair we've already created
+                latestRequestId = requestId;
             }
+
+            // now, let's generate the regular pair of dependency/request
+
+            // first, on behalf of the source, report client span (dependency call)
+            bool isIngressRequest = !isSourceWithinTargetArea && isDestinationWithinTargetArea;
+            if (!isIngressRequest)
+            {
+                log.Append(" D ");
+
+                string requestId = StartDependency(latestRequestId);
+
+                //!!! Temporary support of app propagating Request-Id
+                bool isEgressRequest = isSourceWithinTargetArea && !isDestinationWithinTargetArea;
+                if (isEgressRequest && incomingRequestIdPresent)
+                {
+                    requestId = incomingRequestId;
+                }
+                /////////// end of temporary support
+                    
+                yield return this.GenerateDependency(spanName: destinationRoleInstance, 
+                    requestId: requestId,
+                    parentRequestId: latestRequestId,
+                    spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime, 
+                    roleName: sourceRoleName, 
+                    roleInstance: sourceRoleInstance, 
+                    httpUrl: url,
+                    httpHost: host, httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme, 
+                    protocol: contextProtocol, responseHeadersRequestContextAppId: responseHeadersRequestContextAppId,
+                    debugData: debugData);
+                    
+                // advance latestRequestId
+                latestRequestId = requestId;
+            }
+
+            // now, on behalf of the destination, report server span (request), but only if the destination is within the target area
+            // otherwise it's an external dependency and we don't want to generate requests for it
+            if (isDestinationWithinTargetArea)
+            {
+                log.Append(" R ");
+                // we only want to propagate synthetic context if this is a direct call from a synthetic probe (not through a gateway)
+                // if it's a synthetic call through a gateway, the gateway will be the one for which we've propagated synthetic context above
+                yield return this.GenerateRequest(spanName: destinationRoleInstance, 
+                    requestId: AcknowledgeRequest(latestRequestId),
+                    parentRequestId: latestRequestId,
+                    spanStatusCode: code, spanStatusMessage: string.Empty, startTime: startTime, endTime: endTime,
+                    roleName: destinationRoleName, 
+                    roleInstance: destinationRoleInstance, 
+                    httpUrl: url, httpHost: host,
+                    httpStatusCode: httpStatusCode.ToString(CultureInfo.InvariantCulture), httpPath: httpPath, httpMethod: httpMethod, httpPort: destinationPort, httpScheme: requestScheme,
+                    httpUserAgent: httpUserAgent, httpRoute: string.Empty, requestHeadersRequestContextAppId: requestHeadersRequestContextAppId, requestHeadersSyntheticTestRunId: requestHeadersSyntheticTestRunId,
+                    requestHeadersSyntheticTestLocation: requestHeadersSyntheticTestLocation, propagateSyntheticContext: !isSourceIstioIngressGateway, debugData: debugData);
+            }
+
+            Diagnostics.LogTrace(log.ToString());
         }
 
         private DependencyTelemetry GenerateDependency(string spanName, string requestId, string parentRequestId,

@@ -90,7 +90,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
 
             // ASSERT
             Common.AssertIsTrueEventually(
-                () => input.GetStats().InstancesReceived == 1 && instancesReceived == 1 &&
+                () => input.GetStats().InstancesSucceeded == 1 && instancesReceived == 1 &&
                       receivedInstance.SourceName == "SourceName1", GrpcInputTests.DefaultTimeout);
 
             input.Stop();
@@ -126,7 +126,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
 
             // ASSERT
             Common.AssertIsTrueEventually(
-                () => input.GetStats().InstancesReceived == 1000 && instancesReceived == 1000, GrpcInputTests.DefaultTimeout);
+                () => input.GetStats().InstancesSucceeded == 1000 && instancesReceived == 1000, GrpcInputTests.DefaultTimeout);
 
             input.Stop();
             Assert.IsTrue(SpinWait.SpinUntil(() => !input.IsRunning, GrpcInputTests.DefaultTimeout));
@@ -158,7 +158,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
             await grpcWriter.Write(request).ConfigureAwait(false);
 
             Common.AssertIsTrueEventually(
-                () => input.GetStats().InstancesReceived == 1 && instancesReceived == 1 &&
+                () => input.GetStats().InstancesSucceeded == 1 && instancesReceived == 1 &&
                       receivedInstance.SourceName == "SourceName1", GrpcInputTests.DefaultTimeout);
 
             // ACT
@@ -166,7 +166,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
             
             // ASSERT
             Common.AssertIsTrueEventually(
-                () => !input.IsRunning && input.GetStats().InstancesReceived == 1 && instancesReceived == 1 &&
+                () => !input.IsRunning && input.GetStats().InstancesSucceeded == 1 && instancesReceived == 1 &&
                       receivedInstance.SourceName == "SourceName1", GrpcInputTests.DefaultTimeout);
         }
 
@@ -196,14 +196,14 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
             await grpcWriter.Write(request).ConfigureAwait(false);
 
             Common.AssertIsTrueEventually(
-                () => input.GetStats().InstancesReceived == 1 && instancesReceived == 1 &&
+                () => input.GetStats().InstancesSucceeded == 1 && instancesReceived == 1 &&
                       receivedInstance.SourceName == "SourceName1", GrpcInputTests.DefaultTimeout);
 
             // ACT
             input.Stop();
 
             Common.AssertIsTrueEventually(
-                () => !input.IsRunning && input.GetStats().InstancesReceived == 1 && instancesReceived == 1 &&
+                () => !input.IsRunning && input.GetStats().InstancesSucceeded == 1 && instancesReceived == 1 &&
                       receivedInstance.SourceName == "SourceName1", GrpcInputTests.DefaultTimeout);
 
             input.Start();
@@ -216,7 +216,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
 
             // ASSERT
             Common.AssertIsTrueEventually(
-                () => input.IsRunning && input.GetStats().InstancesReceived == 1 && instancesReceived == 2 &&
+                () => input.IsRunning && input.GetStats().InstancesSucceeded == 1 && instancesReceived == 2 &&
                       receivedInstance.SourceName == "SourceName2", GrpcInputTests.DefaultTimeout);
         }
 
@@ -244,13 +244,13 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library.Inputs.GrpcInput
             // must have handled the exception by logging it
             // should still be able to process items
             Common.AssertIsTrueEventually(
-                () => input.IsRunning && input.GetStats().InstancesReceived == 0 && input.GetStats().InstancesFailed == 1,
+                () => input.IsRunning && input.GetStats().InstancesSucceeded == 0 && input.GetStats().InstancesFailed == 1,
                 GrpcInputTests.DefaultTimeout);
 
             await grpcWriter.Write(request).ConfigureAwait(false);
 
             Common.AssertIsTrueEventually(
-                () => input.IsRunning && input.GetStats().InstancesReceived == 0 && input.GetStats().InstancesFailed == 2,
+                () => input.IsRunning && input.GetStats().InstancesSucceeded == 0 && input.GetStats().InstancesFailed == 2,
                 GrpcInputTests.DefaultTimeout);
         }
     }

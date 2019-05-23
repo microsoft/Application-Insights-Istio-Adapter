@@ -107,7 +107,7 @@
                     {
                         this.onProcessInstance?.Invoke(instance);
 
-                        Interlocked.Increment(ref this.stats.InstancesReceived);
+                        Interlocked.Increment(ref this.stats.InstancesSucceeded);
                     }
                     catch (System.Exception e)
                     {

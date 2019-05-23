@@ -7,7 +7,7 @@
     {
         public int ConnectionCount = 0;
 
-        public long InstancesReceived = 0;
+        public long InstancesSucceeded = 0;
 
         public long RequestsReceived = 0;
 
@@ -15,7 +15,7 @@
 
         public override string ToString()
         {
-            return $"ConnectionCount: {this.ConnectionCount}, RequestsReceived: {this.RequestsReceived}, InstancesReceived: {this.InstancesReceived}, InstancesFailed: {this.InstancesFailed}";
+            return $"ConnectionCount: {this.ConnectionCount}, RequestsReceived: {this.RequestsReceived}, InstancesSucceeded: {this.InstancesSucceeded}, InstancesFailed: {this.InstancesFailed}";
         }
     }
 }
