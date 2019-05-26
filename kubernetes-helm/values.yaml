@@ -1,0 +1,30 @@
+# Default values for istio-azure-monitor-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+istioNamespace: "istio-system"
+
+image:
+  repository: mcr.microsoft.com/applicationinsights/istiomixeradapter
+  tag: v0.2
+  pullPolicy: Always
+
+instrumentation:
+  # instrumentation key for the Application Insights resource to send telemetry to
+  applicationInsightsKey: "00000000-0000-0000-0000-000000000000"
+  # Instrumentation key for Live Metrics in Application Insights
+  liveMetricsKey: ""
+  # comma-separated list of Kubernetes namespaces to monitor. Leave empty if all namespaces must be monitored
+  watchingNamespaces: ""
+  # comma-separated list of Kubernetes namespaces to ignore (has priority over ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES)
+  # Note: to include or exclude telemetry for an individual pod from being collected, use *appinsights/monitoring.enabled* label on that pod. This will have priority over all namespace-based configuration. Set *appinsights/monitoring.enabled* to *true* to include the pod, and to *false* to exclude it.
+  ignoredNamespaces: "istio-system,kube-system"
+  # Log level: Info is the default, Trace for detailed tracing, Error for errors only
+  logLevel: Trace
+  # See https://docs.microsoft.com/en-us/azure/azure-monitor/app/sampling#types-of-sampling
+  adaptiveSamplingLimit: 1000
+
+nameOverride: ""
+fullnameOverride: ""
