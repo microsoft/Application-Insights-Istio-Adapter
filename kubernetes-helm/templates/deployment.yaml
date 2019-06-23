@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "istio-azure-monitor-chart.fullname" . }}
+  namespace: {{ .Values.istioNamespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "istio-azure-monitor-chart.name" . }}
+    helm.sh/chart: {{ include "istio-azure-monitor-chart.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "istio-azure-monitor-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "istio-azure-monitor-chart.name" . }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http2-in-port
+          containerPort: 6789
+        env:
+        - name: ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY
+          value: {{ .Values.instrumentation.applicationInsightsKey | quote }}
+        - name: ISTIO_MIXER_PLUGIN_AI_LIVE_METRICS_STREAM_AUTH_KEY
+          value: {{ .Values.instrumentation.liveMetricsKey | quote }}
+        - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES
+          value: {{ .Values.instrumentation.watchingNamespaces | quote }}
+        - name: ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED
+          value: {{ .Values.instrumentation.ignoredNamespaces | quote }}
+        - name: ISTIO_MIXER_PLUGIN_LOG_LEVEL
+          value: {{ .Values.instrumentation.logLevel | quote }}
+        - name: ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT
+          value: {{ .Values.instrumentation.adaptiveSamplingLimit | quote }}
