@@ -1,13 +1,9 @@
 # Application Insights for Kubernetes
-Application Insights for Kubernetes is a monitoring solution that allows you to collect Application Insights telemetry pertaining to 
-incoming and outgoing requests to and from pods running in your Kubernetes cluster without the need for instrumenting the 
-application with an SDK. We utilize service mesh technology called Istio to collect data, so the only requirement is that your 
-Kubernetes deployment is configured to run with Istio (there are few simple requirements, see below for details).
+Application Insights for Kubernetes is a monitoring solution that allows you to collect Application Insights telemetry pertaining to incoming and outgoing requests to and from pods running in your Kubernetes cluster without the need for instrumenting the application with an SDK. We utilize service mesh technology called Istio to collect data, so the only requirement is that your Kubernetes deployment is configured to run with Istio (there are few simple requirements, see below for details).
 
 *If you are not familiar with Application Insights, see [here](https://docs.microsoft.com/azure/azure-monitor/app/app-insights-overview).*
 
-Since service mesh lifts data off the wire, we can not intercept encrypted traffic. For traffic that doesn't leave the cluster, 
-use plain unencrypted protocol (e.g. HTTP). For external traffic that must be encrypted, consider setting up SSL termination at the ingress controller.
+Since service mesh lifts data off the wire, we can not intercept encrypted traffic. For traffic that doesn't leave the cluster, use plain unencrypted protocol (e.g. HTTP). For external traffic that must be encrypted, consider setting up SSL termination at the ingress controller.
 
 Applications running outside of the service mesh are not affected.
 
@@ -34,9 +30,7 @@ kubectl label namespace <my-app-namespace> istio-injection=enabled
 ```
 
 ### Deploy your application
-- Deploy your application to *my-app-namespace* namespace. If the application is already deployed, and you have followed the automatic 
-sidecar injection method described above, you need to recreate pods to ensure Istio injects its sidecar; either initiate a 
-rolling update or simply delete individual pods and wait for them to be recreated.
+- Deploy your application to *my-app-namespace* namespace. If the application is already deployed, and you have followed the automatic sidecar injection method described above, you need to recreate pods to ensure Istio injects its sidecar; either initiate a rolling update or simply delete individual pods and wait for them to be recreated.
 - Ensure your application complies with Istio requirements listed [here](https://istio.io/docs/setup/kubernetes/prepare/requirements/).
 
 ### Deploy Application Insights for Kubernetes
@@ -46,6 +40,7 @@ rolling update or simply delete individual pods and wait for them to be recreate
     - edit the value of *ISTIO_MIXER_PLUGIN_AI_INSTRUMENTATIONKEY* environment variable to contain the instrumentation key of the Application Insights resource in Azure Portal to contain the telemetry.
     - *if required*, edit the value of *ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES* environment variable to contain a comma-separated list of namespaces for which you would like to enable monitoring. Leave it blank to 
 monitor all namespaces.
+    - *if running in a government cloud*, or in other scenarios where the default Application Insights endpoint must be overridden, edit the values of *ISTIO_MIXER_PLUGIN_TELEMETRY_CHANNEL_ENDPOINT* and *ISTIO_MIXER_PLUGIN_QUICKPULSE_SERVICE_ENDPOINT* environment variables. See [here](https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints#regions-that-require-endpoint-modification) for detailed information about available endpoints.
 4. Apply *every* YAML file found under *src/kubernetes/* by running the following (you must still be inside */src/kubernetes/*):
    ```
    kubectl apply -f .
@@ -102,7 +97,7 @@ each containing its own namespace and instrumentation key.
 - *Are Windows containers supported?* Since only Istio is supported currently, and Istio does not offer support for Windows containers - the answer is no. As soon as supported service meshes are compatible
 with Windows containers this scenario will be enabled.
 - *Distributed tracing support* Support for distributed tracing is coming soon. Currently, only Application Map is supported, not full distributed tracing chains.
-- *Support for other protocols – Redis, mongoDB, HTTPS, etc.* Since telemetry is lifted off the wire, encrypted protocols (like HTTPS) cannot be supported. For internal traffic use plain unecnrypted protocols (like HTTP); 
+- *Support for other protocols - Redis, mongoDB, HTTPS, etc.* Since telemetry is lifted off the wire, encrypted protocols (like HTTPS) cannot be supported. For internal traffic use plain unecnrypted protocols (like HTTP); 
 for external traffic that must be encrypted consider setting up SSL termination at the ingress gateway. Support for some of the most popular non-HTTP protocols is coming.
 
 ## Uninstall

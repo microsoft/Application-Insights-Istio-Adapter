@@ -22,9 +22,6 @@
 
         private readonly TelemetryGenerator telemetryGenerator;
 
-        private readonly string instrumentationKey;
-        private readonly string liveMetricsStreamAuthenticationApiKey;
-        
         private readonly TimeSpan statsTracingTimeout = TimeSpan.FromMinutes(1);
         
         /// <summary>
@@ -42,9 +39,6 @@
         {
             this.config = new Configuration(configuration);
 
-            this.instrumentationKey = this.config.InstrumentationKey;
-            this.liveMetricsStreamAuthenticationApiKey = this.config.LiveMetricsStreamAuthenticationApiKey;
-            
             Diagnostics.LogInfo(
                 FormattableString.Invariant($"Loaded configuration. {Environment.NewLine}{configuration}"));
 
@@ -53,9 +47,14 @@
             try
             {
                 var activeConfiguration = TelemetryConfiguration.Active;
-                activeConfiguration.InstrumentationKey = this.instrumentationKey;
+                activeConfiguration.InstrumentationKey = this.config.InstrumentationKey;
 
                 var channel = new ServerTelemetryChannel();
+                string telemetryChannelEndpoint = this.config.Endpoints_TelemetryChannelEndpoint;
+                if(!string.IsNullOrWhiteSpace(telemetryChannelEndpoint))
+                {
+                    channel.EndpointAddress = telemetryChannelEndpoint;
+                }
                 channel.Initialize(activeConfiguration);
                 activeConfiguration.TelemetryChannel = channel;
 
@@ -76,7 +75,13 @@
 
                 builder.Build();
 
-                var quickPulseModule = new QuickPulseTelemetryModule() { AuthenticationApiKey = this.liveMetricsStreamAuthenticationApiKey };
+                var quickPulseModule = new QuickPulseTelemetryModule() {AuthenticationApiKey = this.config.LiveMetricsStreamAuthenticationApiKey};
+                string quickPulseServiceEndpoint = this.config.Endpoints_QuickPulseServiceEndpoint;
+                if (!string.IsNullOrWhiteSpace(quickPulseServiceEndpoint))
+                {
+                    quickPulseModule.QuickPulseServiceEndpoint = quickPulseServiceEndpoint;
+                }
+
                 quickPulseModule.Initialize(activeConfiguration);
                 quickPulseModule.RegisterTelemetryProcessor(processor);
 

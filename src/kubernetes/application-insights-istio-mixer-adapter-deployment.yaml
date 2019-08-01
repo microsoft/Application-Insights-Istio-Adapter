@@ -35,6 +35,10 @@ spec:
           value: Info # Log level: Info is the default, Trace for detailed tracing, Error for errors only
         - name: ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT
           value: "1000"
+        - name: ISTIO_MIXER_PLUGIN_TELEMETRY_CHANNEL_ENDPOINT
+          value: "" # telemetry ingestion endpoint. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints#regions-that-require-endpoint-modification for available options
+        - name: ISTIO_MIXER_PLUGIN_QUICKPULSE_SERVICE_ENDPOINT
+          value: "" # live metrics stream (QuickPulse) endpoint. See https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints#regions-that-require-endpoint-modification for available options
 ---
 apiVersion: v1
 kind: Service
