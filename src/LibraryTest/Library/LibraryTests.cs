@@ -36,6 +36,9 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
       <!--Telemetry items other than events are counted together-->
       <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
+    <Endpoints>
+      <TelemetryChannelEndpoint></TelemetryChannelEndpoint>
+    </Endpoints>
 </Configuration>
 ";
             var lib = new Library(config);

@@ -98,6 +98,38 @@
             }
         }
 
+        public string Endpoints_TelemetryChannelEndpoint
+        {
+            get
+            {
+                try
+                {
+                    return this.configuration.Element("Endpoints")?.Element("TelemetryChannelEndpoint")?.Value;
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException(
+                        FormattableString.Invariant($"Could not find or convert the data field {MethodBase.GetCurrentMethod().Name} in configuration. {this.configuration.Value}"), e);
+                }
+            }
+        }
+
+        public string Endpoints_QuickPulseServiceEndpoint
+        {
+            get
+            {
+                try
+                {
+                    return this.configuration.Element("Endpoints")?.Element("QuickPulseServiceEndpoint")?.Value;
+                }
+                catch (Exception e)
+                {
+                    throw new ArgumentException(
+                        FormattableString.Invariant($"Could not find or convert the data field {MethodBase.GetCurrentMethod().Name} in configuration. {this.configuration.Value}"), e);
+                }
+            }
+        }
+
         public string[] Watchlist_Namespaces
         {
             get

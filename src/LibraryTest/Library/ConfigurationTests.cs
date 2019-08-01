@@ -30,6 +30,8 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT", "25", EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES", null, EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_TELEMETRY_CHANNEL_ENDPOINT", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_QUICKPULSE_SERVICE_ENDPOINT", null, EnvironmentVariableTarget.Process);
 
             // ACT
             var config = new Configuration(defaultConfig);
@@ -42,6 +44,8 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             Assert.AreEqual("%ISTIO_MIXER_PLUGIN_AI_LIVE_METRICS_STREAM_AUTH_KEY%", config.LiveMetricsStreamAuthenticationApiKey);
             Assert.AreEqual("%ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES%", config.Watchlist_Namespaces.Single());
             Assert.AreEqual("%ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED%", config.Watchlist_IgnoredNamespaces.Single());
+            Assert.AreEqual("%ISTIO_MIXER_PLUGIN_TELEMETRY_CHANNEL_ENDPOINT%", config.Endpoints_TelemetryChannelEndpoint);
+            Assert.AreEqual("%ISTIO_MIXER_PLUGIN_QUICKPULSE_SERVICE_ENDPOINT%", config.Endpoints_QuickPulseServiceEndpoint);
 
             Assert.AreEqual(true, config.AdaptiveSampling_Enabled);
             Assert.AreEqual(10, config.AdaptiveSampling_MaxEventsPerSecond);
@@ -51,6 +55,8 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT", null, EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES", null, EnvironmentVariableTarget.Process);
             Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_WATCHLIST_NAMESPACES_IGNORED", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_TELEMETRY_CHANNEL_ENDPOINT", null, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("ISTIO_MIXER_PLUGIN_QUICKPULSE_SERVICE_ENDPOINT", null, EnvironmentVariableTarget.Process);
         }
 
         [TestMethod]
@@ -68,6 +74,10 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
       <!--Telemetry items other than events are counted together-->
       <MaxOtherItemsPerSecond>%ISTIO_MIXER_PLUGIN_AI_ADAPTIVE_SAMPLING_LIMIT%</MaxOtherItemsPerSecond>
     </AdaptiveSampling>
+    <Endpoints>
+        <TelemetryChannelEndpoint>%TelemetryChannelEndpoint%</TelemetryChannelEndpoint>
+        <QuickPulseServiceEndpoint>%QuickPulseEndpoint%</QuickPulseServiceEndpoint>
+    </Endpoints>
 </Configuration>
 ";
 
@@ -75,11 +85,15 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             string host = Guid.NewGuid().ToString();
             string port = rand.Next().ToString();
             string ikey = Guid.NewGuid().ToString();
-            
+            string telemetryChannelEndpoint = Guid.NewGuid().ToString();
+            string quickPulseEndpoint = Guid.NewGuid().ToString();
+
             Environment.SetEnvironmentVariable("Input_Host", host);
             Environment.SetEnvironmentVariable("Input_Port", port);
             Environment.SetEnvironmentVariable("ConfigTestInstrumentationKey", ikey);
-            
+            Environment.SetEnvironmentVariable("TelemetryChannelEndpoint", telemetryChannelEndpoint);
+            Environment.SetEnvironmentVariable("QuickPulseEndpoint", quickPulseEndpoint);
+
             // ACT
             var configuration = new Configuration(config);
 
@@ -87,6 +101,8 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             Assert.AreEqual(host, configuration.Host);
             Assert.AreEqual(port, configuration.Port.ToString());
             Assert.AreEqual(ikey, configuration.InstrumentationKey);
+            Assert.AreEqual(telemetryChannelEndpoint, configuration.Endpoints_TelemetryChannelEndpoint);
+            Assert.AreEqual(quickPulseEndpoint, configuration.Endpoints_QuickPulseServiceEndpoint);
         }
 
         [TestMethod]
