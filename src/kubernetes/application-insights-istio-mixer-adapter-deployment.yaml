@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: application-insights-istio-mixer-adapter
-        image: mcr.microsoft.com/applicationinsights/istiomixeradapter:v0.2
+        image: mcr.microsoft.com/applicationinsights/istiomixeradapter:v0.4
         ports:
         - name: http2-in-port
           containerPort: 6789
