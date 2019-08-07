@@ -25,6 +25,14 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             var telemetryGenerator = new TelemetryGenerator(new []{"ns1", "ns2"}, new string[]{});
 
             // ACT
+            var instance0 = Common.GetStandardInstanceMsg();
+            instance0.SpanTags["source.workload.namespace"].StringValue = "unknown";
+            instance0.SpanTags["destination.workload.namespace"].StringValue = "ns1";
+
+            var instance00 = Common.GetStandardInstanceMsg();
+            instance00.SpanTags["source.workload.namespace"].StringValue = "";
+            instance00.SpanTags["destination.workload.namespace"].StringValue = "ns1";
+
             var instance1 = Common.GetStandardInstanceMsg();
             instance1.SpanTags["source.workload.namespace"].StringValue = "ns10";
             instance1.SpanTags["destination.workload.namespace"].StringValue = "ns20";
@@ -32,6 +40,7 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             var instance2 = Common.GetStandardInstanceMsg();
             instance2.SpanTags["source.workload.namespace"].StringValue = "ns1";
             instance2.SpanTags["destination.workload.namespace"].StringValue = "ns10";
+            instance2.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-deployment-1";
             instance2.SpanTags["context.reporter.kind"].StringValue = "outbound";
 
             var instance3 = Common.GetStandardInstanceMsg();
@@ -42,17 +51,105 @@ namespace Microsoft.IstioMixerPlugin.LibraryTest.Library
             instance4.SpanTags["source.workload.namespace"].StringValue = "ns1";
             instance4.SpanTags["destination.workload.namespace"].StringValue = "ns2";
 
-            var telemetry = telemetryGenerator.Generate(instance1, instance2, instance3, instance4).ToList();
+            var instance5 = Common.GetStandardInstanceMsg();
+            instance5.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance5.SpanTags["destination.workload.namespace"].StringValue = "unknown";
+            instance5.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-deployment-1";
+            instance5.SpanTags["context.reporter.kind"].StringValue = "outbound";
+
+            var instance55 = Common.GetStandardInstanceMsg();
+            instance55.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance55.SpanTags["destination.workload.namespace"].StringValue = "";
+            instance55.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-deployment-1";
+            instance55.SpanTags["context.reporter.kind"].StringValue = "outbound";
+
+            var telemetry = telemetryGenerator.Generate(instance0, instance00, instance1, instance2, instance3, instance4, instance5, instance55).ToList();
 
             // ASSERT
-            Assert.AreEqual(0 + 1 + 1 + 2, telemetry.Count);
+            Assert.AreEqual(1 + 1 + 0 + 1 + 1 + 2 + 1 + 1, telemetry.Count);
 
-            Assert.IsTrue(telemetry[0] is DependencyTelemetry);
+            Assert.IsTrue(telemetry[0] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[1] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[2] is DependencyTelemetry);
+
+            Assert.IsTrue(telemetry[3] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[4] is DependencyTelemetry);
+            Assert.IsTrue(telemetry[5] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[6] is DependencyTelemetry);
+
+            Assert.IsTrue(telemetry[7] is DependencyTelemetry);
+        }
+
+        [TestMethod]
+        public void TelemetryGeneratorTests_HandlesEmptyTargetNamespacesCorrectly()
+        {
+            // ARRANGE
+            var telemetryGenerator = new TelemetryGenerator(new string[] { }, new string[] { });
+
+            // ACT
+            var instance0 = Common.GetStandardInstanceMsg();
+            instance0.SpanTags["source.workload.namespace"].StringValue = "unknown";
+            instance0.SpanTags["destination.workload.namespace"].StringValue = "ns1";
+
+            var instance00 = Common.GetStandardInstanceMsg();
+            instance00.SpanTags["source.workload.namespace"].StringValue = "";
+            instance00.SpanTags["destination.workload.namespace"].StringValue = "ns1";
+
+            var instance1 = Common.GetStandardInstanceMsg();
+            instance1.SpanTags["source.workload.namespace"].StringValue = "ns10";
+            instance1.SpanTags["destination.workload.namespace"].StringValue = "ns20";
+
+            var instance2 = Common.GetStandardInstanceMsg();
+            instance2.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance2.SpanTags["destination.workload.namespace"].StringValue = "ns10";
+            instance2.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-deployment-1";
+            instance2.SpanTags["context.reporter.kind"].StringValue = "outbound";
+
+            var instance3 = Common.GetStandardInstanceMsg();
+            instance3.SpanTags["source.workload.namespace"].StringValue = "ns10";
+            instance3.SpanTags["destination.workload.namespace"].StringValue = "ns1";
+
+            var instance4 = Common.GetStandardInstanceMsg();
+            instance4.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance4.SpanTags["destination.workload.namespace"].StringValue = "ns2";
+
+            var instance5 = Common.GetStandardInstanceMsg();
+            instance5.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance5.SpanTags["destination.workload.namespace"].StringValue = "unknown";
+            instance5.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-deployment-1";
+            instance5.SpanTags["context.reporter.kind"].StringValue = "outbound";
+
+            var instance55 = Common.GetStandardInstanceMsg();
+            instance55.SpanTags["source.workload.namespace"].StringValue = "ns1";
+            instance55.SpanTags["destination.workload.namespace"].StringValue = "";
+            instance55.SpanTags["context.reporter.uid"].StringValue = "kubernetes://source-deployment-1";
+            instance55.SpanTags["context.reporter.kind"].StringValue = "outbound";
+
+            var telemetry = telemetryGenerator.Generate(instance0, instance00, instance1, instance2, instance3, instance4, instance5, instance55).ToList();
+
+            // ASSERT
+            Assert.AreEqual(1 + 1 + 2 + 0 + 2 + 2 + 1 + 1, telemetry.Count);
+
+            Assert.IsTrue(telemetry[0] is RequestTelemetry);
 
             Assert.IsTrue(telemetry[1] is RequestTelemetry);
 
             Assert.IsTrue(telemetry[2] is DependencyTelemetry);
             Assert.IsTrue(telemetry[3] is RequestTelemetry);
+            
+            Assert.IsTrue(telemetry[4] is DependencyTelemetry);
+            Assert.IsTrue(telemetry[5] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[6] is DependencyTelemetry);
+            Assert.IsTrue(telemetry[7] is RequestTelemetry);
+
+            Assert.IsTrue(telemetry[8] is DependencyTelemetry);
+
+            Assert.IsTrue(telemetry[9] is DependencyTelemetry);
         }
 
         [TestMethod]

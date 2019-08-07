@@ -438,10 +438,12 @@ namespace Microsoft.IstioMixerPlugin.Library
             // in order to be interesting to us, the instance must involve at least one workload that is within our target namespace
             // the user is also capable of opting a workload in or out of our area of interest by labeling it appropriately
 
-            // if there is no target namespace, any workload is considered to be within the target namespace
-            bool sourceIsWithinTargetNamespace = this.targetNamespaces.Length == 0 || this.targetNamespaces.Any(ns => string.Equals(sourceNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
-            bool destinationIsWithinTargetNamespace =
-                this.targetNamespaces.Length == 0 || this.targetNamespaces.Any(ns => string.Equals(destinationNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
+            // if there is no target namespace, any workload is considered to be within the target namespace unless it's outside of the cluster
+            bool sourceIsWithinTargetNamespace = IsNamespaceSpecified(sourceNamespace) &&
+                                                 (this.targetNamespaces.Length == 0 ||
+                                                  this.targetNamespaces.Any(ns => string.Equals(sourceNamespace, ns, StringComparison.InvariantCultureIgnoreCase)));
+            bool destinationIsWithinTargetNamespace = IsNamespaceSpecified(destinationNamespace) && (
+                this.targetNamespaces.Length == 0 || this.targetNamespaces.Any(ns => string.Equals(destinationNamespace, ns, StringComparison.InvariantCultureIgnoreCase)));
 
             bool sourceIsWithinIgnoredNamespace = this.ignoredNamespaces.Any(ns => string.Equals(sourceNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
             bool destinationIsWithinIgnoredNamespace = this.ignoredNamespaces.Any(ns => string.Equals(destinationNamespace, ns, StringComparison.InvariantCultureIgnoreCase));
@@ -480,6 +482,11 @@ namespace Microsoft.IstioMixerPlugin.Library
                 telemetry.Context.User.Id = Invariant($"{requestHeadersSyntheticTestLocation}_{requestHeadersSyntheticTestRunId}");
                 telemetry.Context.Session.Id = requestHeadersSyntheticTestRunId;
             }
+        }
+
+        private static bool IsNamespaceSpecified(string namespaceName)
+        {
+            return !string.IsNullOrWhiteSpace(namespaceName) && !string.Equals(namespaceName, UnknownValue, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private static string GetHost(string url)
