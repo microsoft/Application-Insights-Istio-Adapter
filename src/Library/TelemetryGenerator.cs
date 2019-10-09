@@ -49,6 +49,7 @@ namespace Microsoft.IstioMixerPlugin.Library
         {
 #if DEBUG_INFO
             var debugInfo = instance.ToString();
+            Diagnostics.LogInfo($"Received instance: {debugInfo}");
 #endif
 
             var sourceUid = instance.SpanTags["source.uid"].StringValue;
