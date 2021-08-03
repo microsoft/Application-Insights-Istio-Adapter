@@ -1,4 +1,6 @@
 
+## This solution is no longer under development. If your workload is running in Azure - check out what Azure AKS team has to offer in terms of monitoring applications natively (with no reliance on any service mesh)
+
 # Application Insights adapter for Istio Mixer
 Application Insights adapter for Istio Mixer is an adapter designed to collect Application Insights telemetry in Istio-enabled Kubernetes clusters, including AKS clusters.
 
