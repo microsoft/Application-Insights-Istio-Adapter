@@ -97,7 +97,7 @@ each containing its own namespace and instrumentation key.
 - *Are Windows containers supported?* Since only Istio is supported currently, and Istio does not offer support for Windows containers - the answer is no. As soon as supported service meshes are compatible
 with Windows containers this scenario will be enabled.
 - *Distributed tracing support* Support for distributed tracing is coming soon. Currently, only Application Map is supported, not full distributed tracing chains.
-- *Support for other protocols - Redis, mongoDB, HTTPS, etc.* Since telemetry is lifted off the wire, encrypted protocols (like HTTPS) cannot be supported. For internal traffic use plain unecnrypted protocols (like HTTP); 
+- *Support for other protocols - Redis, mongoDB, HTTPS, etc.* Since telemetry is lifted off the wire, encrypted protocols (like HTTPS) cannot be supported. For internal traffic use plain unencrypted protocols (like HTTP); 
 for external traffic that must be encrypted consider setting up SSL termination at the ingress gateway. Support for some of the most popular non-HTTP protocols is coming.
 
 ## Uninstall
